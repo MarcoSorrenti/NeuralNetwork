@@ -21,7 +21,7 @@ monk_train = monk_train.sample(frac=1, random_state=42)
 
 X_train_to_encode = monk_train.iloc[:,1:]
 #one hot encoding
-X_train = pd.get_dummies(X_train_to_encode, columns=[col for col in X_train_to_encode.columns])
+X_train = pd.get_dummies(X_train_to_encode, columns=[col for col in X_train_to_encode.columns]) # encoding
 y_train = monk_train.iloc[:,0]
 X_train = np.array(X_train)
 y_train = np.array(y_train).reshape(-1,1)
@@ -51,8 +51,8 @@ b_size = X_train.shape[0]
 n_features = X_train.shape[1]
 
 model = NeuralNetwork(X_train, y_train)
-input_layer = DLayer(n_features,3,'tanh','xavier_uniform')
-hidden1 = DLayer(3,1,'tanh','xavier_uniform')
+input_layer = DLayer(n_features,3,'tanh','xavier_normal')
+hidden1 = DLayer(3,1,'tanh','xavier_normal')
 model.add(input_layer)
 model.add(hidden1)
 

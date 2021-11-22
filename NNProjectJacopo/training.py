@@ -5,7 +5,7 @@ from Layers import DLayer
 import matplotlib.pyplot as plt
 
     
-MONK_PROBLEM = 1
+MONK_PROBLEM = 2
 
 #TRAINING SET
 monk_train = pd.read_csv(
@@ -17,7 +17,7 @@ monk_train = pd.read_csv(
 
 #TRAINING SET PREPROCESSING
 monk_train = monk_train.iloc[:,:-1]
-monk_train = monk_train.sample(frac=1, random_state=42)
+#monk_train = monk_train.sample(frac=1, random_state=42)
 
 X_train_to_encode = monk_train.iloc[:,1:]
 #one hot encoding
@@ -37,7 +37,7 @@ monk_test = pd.read_csv(
 
 #TEST SET PREPROCESSING
 monk_test = monk_test.iloc[:,:-1]
-monk_test = monk_test.sample(frac=1, random_state=42)
+#monk_test = monk_test.sample(frac=1, random_state=42)
 
 X_test_to_encode = monk_test.iloc[:,1:]
 #one hot encoding
@@ -51,15 +51,15 @@ b_size = X_train.shape[0]
 n_features = X_train.shape[1]
 
 model = NeuralNetwork(X_train, y_train)
-input_layer = DLayer(n_features,3,'tanh','xavier_normal')
-hidden1 = DLayer(3,1,'tanh','xavier_normal')
+input_layer = DLayer(n_features,3,'relu','he_uniform')
+hidden1 = DLayer(3,1,'sigmoid','xavier_uniform')
 model.add(input_layer)
 model.add(hidden1)
 
-model.train(lr=0.2,
+model.train(lr=0.3,
             epochs=200,
             batch_size=b_size,
-            momentum=0.8,
+            momentum=0.9,
             loss_function='mse',
             lambd=0.,
             lr_factor=0.)

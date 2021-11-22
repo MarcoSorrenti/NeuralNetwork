@@ -36,17 +36,17 @@ class Layer():
         self.net = np.dot(input, self.w) + self.b
         self.output = Sigmoid().evaluate(self.net)
 
+        return self.output
 
     def backward(self, error):
-        pass
+        delta = error * Sigmoid().derivative(self.net)
+        self.gradient = np.dot(self.input.T, delta)
+        delta_j = np.dot(delta,self.w.T)
+        
+
+        return delta_j
 
 
 
 
 
-
-    
-
-
-
-    

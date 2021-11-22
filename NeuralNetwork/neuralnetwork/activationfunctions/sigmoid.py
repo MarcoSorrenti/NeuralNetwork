@@ -6,7 +6,7 @@ class Sigmoid():
         self.a = a
 
     def evaluate(self, x):
-        return np.exp(np.fmin(x, 0)) / (1 + np.exp(-np.abs(x)))
+        return 1 / (1 + np.exp(-self.a*x))
 
     def derivative(self, x):
         x = self.evaluate(x)

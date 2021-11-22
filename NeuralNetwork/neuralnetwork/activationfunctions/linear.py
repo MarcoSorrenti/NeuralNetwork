@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Linear():
 
     def evaluate(self, x):

@@ -3,7 +3,7 @@ import numpy as np
 
 
 
-def import_dataset(problem):
+def load_monk(problem):
     monk_train = pd.read_csv(
         "http://archive.ics.uci.edu/ml/machine-learning-databases/monks-problems/monks-{}.train".format(problem),
         header=None,

@@ -1,5 +1,8 @@
 import numpy as np
+from copy import deepcopy
+from neuralnetwork.activationfunctions.relu import Relu
 from neuralnetwork.activationfunctions.sigmoid import Sigmoid
+
 
 class Layer():
     def __init__(self, input_dim, n_units, activation_function='sigmoid', weights_init='random_init'):
@@ -9,6 +12,8 @@ class Layer():
         self.weights_init = weights_init
         self.w = np.zeros((self.input_dim, self.n_units))
         self.b = np.zeros((1,self.n_units))
+        self.w_gradient = np.zeros((input_dim,n_units))
+        self.b_gradient = np.zeros((1,n_units))
 
         self.weights_initializer()
 
@@ -34,17 +39,28 @@ class Layer():
     def forward(self, input):
         self.input = input
         self.net = np.dot(input, self.w) + self.b
-        self.output = Sigmoid().evaluate(self.net)
 
+        if self.activation_function == 'sigmoid':
+            self.output = Sigmoid().evaluate(self.net)
+        else:
+            self.output = Relu().evaluate(self.net)
+            
         return self.output
 
     def backward(self, error):
-        delta = error * Sigmoid().derivative(self.net)
-        self.gradient = np.dot(self.input.T, delta)
-        delta_j = np.dot(delta,self.w.T)
-        
+        self.old_w_gradient = deepcopy(self.w_gradient)
+        self.old_b_gradient = deepcopy(self.b_gradient)
 
-        return delta_j
+        if self.activation_function == 'sigmoid':
+            delta = error * Sigmoid().derivative(self.net)
+        else:
+            delta = error * Relu().derivative(self.net)
+
+        self.w_gradient = np.dot(self.input.T, delta)
+        self.b_gradient = np.sum(delta, axis=0, keepdims=True)
+        error_j = np.dot(delta,self.w.T)
+
+        return error_j
 
 
 

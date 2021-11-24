@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from copy import deepcopy
 
 class NeuralNetwork():
     def __init__(self, epochs=150, batch_size=64, lr=0.1, momentum=0.5, regularization='l2'):
@@ -44,14 +45,14 @@ class NeuralNetwork():
                 
                 #BACKPROPAGATION
                 error = out_batch - output
-                error_j = self.layers[-1].backward(error)
-                for layer in reversed(self.layers[:-1]):
-                    layer.backward(error_j)
+                for layer in reversed(self.layers):
+                    error = layer.backward(error)
 
                 
                 #OPTIMIZATION
                 for layer in self.layers:
-                    #lr = self.lr / self.batch_size
+                    layer.w_gradient /= self.batch_size
+                    layer.b_gradient /= self.batch_size
                     delta_w = layer.w_gradient * self.lr
                     delta_b = layer.b_gradient * self.lr
                     layer.w_gradient = np.add(delta_w, layer.old_w_gradient*self.momentum)
@@ -60,7 +61,7 @@ class NeuralNetwork():
                     layer.b = np.add(layer.b, layer.b_gradient)
 
                 #batch loss
-                mse = (np.sum((error)**2))/self.batch_size
+                mse = (np.sum((out_batch-output)**2))/self.batch_size
                 print("{} ---> Loss:\t{}".format(it+1, mse))
                 epoch_loss.append(mse)
             
@@ -71,7 +72,8 @@ class NeuralNetwork():
             
 
     def predict(self, x_test):
-        output = self.feedForward(x_test)
+        model = deepcopy(self)
+        output = model.feedForward(x_test)
         return output
                 
             

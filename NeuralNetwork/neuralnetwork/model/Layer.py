@@ -2,6 +2,7 @@ import numpy as np
 from copy import deepcopy
 from neuralnetwork.activationfunctions.relu import Relu
 from neuralnetwork.activationfunctions.sigmoid import Sigmoid
+from neuralnetwork.weights_initalizers import *
 
 
 class Layer():
@@ -18,20 +19,14 @@ class Layer():
         self.weights_initializer()
 
 
-    def Xavier_normal(self, fan_in, fan_out):
-        limit = np.sqrt(2 / float(fan_in + fan_out))
-        weights = np.random.normal(0., limit, size=(fan_in, fan_out))
-        return weights
-
-    def Xavier_uniform(self, fan_in, fan_out):
-        limit = np.sqrt(6 / float(fan_in + fan_out))
-        weights = np.random.uniform(low=-limit, high=limit, size=(fan_in, fan_out))
-        return weights
 
     def weights_initializer(self):
-        if (self.weights_init == "random_init"):
-            self.w = self.Xavier_uniform(self.input_dim, self.n_units)
-            self.b = self.Xavier_uniform(1, self.n_units)
+        if self.weights_init == 'random':
+            self.w = random_init(self.input_dim, self.n_units)
+            self.b = random_init(1, self.n_units)
+        elif self.weights_init == "xavier":
+            self.w = Xavier_uniform(self.input_dim, self.n_units)
+            self.b = Xavier_uniform(1, self.n_units)
         else:
             pass
 
@@ -52,9 +47,11 @@ class Layer():
         self.old_b_gradient = deepcopy(self.b_gradient)
 
         if self.activation_function == 'sigmoid':
-            delta = error * Sigmoid().derivative(self.net)
+            der_net = Sigmoid().derivative(self.net)
         else:
-            delta = error * Relu().derivative(self.net)
+            der_net = Relu().derivative(self.net)
+        
+        delta = np.multiply(error,der_net)
 
         self.w_gradient = np.dot(self.input.T, delta)
         self.b_gradient = np.sum(delta, axis=0, keepdims=True)

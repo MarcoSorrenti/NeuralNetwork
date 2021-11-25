@@ -18,25 +18,19 @@ class NeuralNetwork():
     def fit(self, X, y):
         self.X = X
         self.y = y
-        
 
     def feedForward(self, batch):
         output = self.layers[0].forward(batch)
         for layer in self.layers[1:]:
             output = layer.forward(output)
-
         return output
 
     def train(self):
-
         for epoch in range(self.epochs):
-
             print("EPOCH {} --->".format(epoch))
-
             epoch_loss = []
 
             for it, n in enumerate(range(0,len(self.X),self.batch_size)):
-
                 in_batch = self.X[n:n+self.batch_size]
                 out_batch = self.y[n:n+self.batch_size]
 
@@ -47,7 +41,6 @@ class NeuralNetwork():
                 error = out_batch - output
                 for layer in reversed(self.layers):
                     error = layer.backward(error)
-
                 
                 #OPTIMIZATION
                 for layer in self.layers:
@@ -75,9 +68,6 @@ class NeuralNetwork():
         model = deepcopy(self)
         output = model.feedForward(x_test)
         return output
-                
-            
-
         
     #for n, layer in enumerate(self.layers):
     #    print("LAYER {}".format(n))

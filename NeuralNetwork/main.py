@@ -12,8 +12,8 @@ n_features = X_train.shape[1]
 
 batch_size = len(X_train)
 model = NeuralNetwork(epochs=300,batch_size=batch_size, lr=0.5,momentum=0.8)
-input_layer = Layer(n_features,3, activation_function='relu', weights_init='random')
-hidden_layer = Layer(3,1, weights_init='xavier')
+input_layer = Layer(n_features,3, activation_function='relu', weights_init='random_init')
+hidden_layer = Layer(3,1, weights_init='xavier_uniform')
 model.add_layer(input_layer)
 model.add_layer(hidden_layer)
 model.fit(X_train, y_train) 

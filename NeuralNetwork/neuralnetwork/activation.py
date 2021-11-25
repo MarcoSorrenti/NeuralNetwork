@@ -50,3 +50,10 @@ class Softmax(Activation):
     def derivative(self, x):
         return np.diagflat(self.evaluate(x)) - np.dot(self.evaluate(x), self.evaluate(x).T)
 
+
+activation_function_dict = {"linear": Linear(),
+                                "sigmoid": Sigmoid(),
+                                "tanh": Tanh(),
+                                "relu": Relu(),
+                                "softmax": Softmax()}
+    

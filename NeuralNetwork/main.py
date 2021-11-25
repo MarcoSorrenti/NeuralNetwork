@@ -6,7 +6,7 @@ from neuralnetwork.model.NeuralNetwork import NeuralNetwork
 from sklearn.metrics import confusion_matrix
 
 
-X_train, X_test, y_train, y_test = load_monk(3)
+X_train, X_test, y_train, y_test = load_monk(2)
 
 n_features = X_train.shape[1]
 

@@ -11,7 +11,6 @@ class NeuralNetwork():
         self.lr = lr
         self.momentum = momentum
         self.regularization = regularization_dict[regularization](lambd)
-        self.lambd = lambd
         self.loss = []
 
     def add_layer(self, layer):
@@ -29,7 +28,21 @@ class NeuralNetwork():
                 penalty_term += self.regularization.compute(layer.w)
         return output, penalty_term
 
+
+    def backprop(self, input, y_true, reg=False):
+        y_pred, penalty_term = self.feedForward(input)
+        if reg is None: penalty_term = 0
+
+        error = y_true - y_pred
+        mse = (np.sum((error)**2) + penalty_term) / self.batch_size
+
+        for layer in reversed(self.layers):
+            error = layer.backward(error)
+            
+        return mse
+
     def train(self):
+
         for epoch in range(self.epochs):
             print("EPOCH {} --->".format(epoch))
             epoch_loss = []
@@ -38,15 +51,7 @@ class NeuralNetwork():
                 in_batch = self.X[n:n+self.batch_size]
                 out_batch = self.y[n:n+self.batch_size]
 
-                #FEEDFORWARD
-                output, penalty_term = self.feedForward(in_batch)
-
-                error = out_batch - output
-                mse = (np.sum((error)**2) + penalty_term) / self.batch_size
-
-                #BACKPROPAGATION
-                for layer in reversed(self.layers):
-                    error = layer.backward(error)
+                mse = self.backprop(in_batch, out_batch)
                 
                 #OPTIMIZATION
                 for layer in self.layers:
@@ -70,7 +75,8 @@ class NeuralNetwork():
             mean_loss = sum(epoch_loss) / len(epoch_loss)
             self.loss.append(mean_loss)
             print("LOSS ---> {}\n".format(mean_loss))
-        
+    
+
     def predict(self, x_test):
         model = deepcopy(self)
         output, _ = model.feedForward(x_test)

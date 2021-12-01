@@ -10,7 +10,7 @@ class NeuralNetwork():
         self.batch_size = batch_size
         self.lr = lr
         self.momentum = momentum
-        self.regularization = regularization_dict[regularization] or None
+        self.regularization = regularization_dict[regularization](lambd)
         self.lambd = lambd
         self.loss = []
 
@@ -26,7 +26,7 @@ class NeuralNetwork():
         for layer in self.layers:           
             output = layer.forward(output)
             if self.regularization is not None:
-                penalty_term += self.regularization.compute(self.lambd, layer.w)
+                penalty_term += self.regularization.compute(layer.w)
         return output, penalty_term
 
     def train(self):
@@ -40,9 +40,11 @@ class NeuralNetwork():
 
                 #FEEDFORWARD
                 output, penalty_term = self.feedForward(in_batch)
-                mse = (np.sum((out_batch-output)**2) + penalty_term) / self.batch_size
-                #BACKPROPAGATION
+
                 error = out_batch - output
+                mse = (np.sum((error)**2) + penalty_term) / self.batch_size
+
+                #BACKPROPAGATION
                 for layer in reversed(self.layers):
                     error = layer.backward(error)
                 
@@ -55,7 +57,7 @@ class NeuralNetwork():
                     layer.w_gradient = np.add(delta_w, layer.old_w_gradient*self.momentum)
                     layer.b_gradient = np.add(delta_b, layer.old_b_gradient*self.momentum)
                     if self.regularization is not None:
-                        layer.w = np.add(layer.w, layer.w_gradient - self.regularization.derivate(self.lambd, layer.w))  # + reg l2
+                        layer.w = np.add(layer.w, layer.w_gradient - self.regularization.derivate(layer.w))
                     else:
                         layer.w = np.add(layer.w, layer.w_gradient)
                     layer.b = np.add(layer.b, layer.b_gradient)

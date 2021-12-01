@@ -1,21 +1,27 @@
 import numpy as np
 
-class L1():        
-    def compute(self, lambd, w):
-        return lambd * np.sum(np.abs(w)) #to be checked
+class L1():
+    def __init__(self, lambd):
+        self.lambd = lambd
 
-    def derivate(self, lambd, w_old):
-        return 2 * lambd * w_old
+    def compute(self, w):
+        return self.lambd * np.sum(np.abs(w)) #to be checked
+
+    def derivate(self, w_old):
+        return 2 * self.lambd * w_old
 
 class L2():
-    def compute(self, lambd, w):
-        return lambd * np.sum((w)**2) #to be checked
+    def __init__(self, lambd):
+        self.lambd = lambd
 
-    def derivate(self, lambd, w_old):
-        return 2 * lambd * w_old
+    def compute(self, w):
+        return self.lambd * np.sum((w)**2) #to be checked
+
+    def derivate(self, w_old):
+        return 2 * self.lambd * w_old
 
 regularization_dict = {
-    "l1": L1(),
-    "l2": L2()
+    "l1": L1,
+    "l2": L2
 }
 

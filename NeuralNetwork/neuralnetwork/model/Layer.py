@@ -9,14 +9,11 @@ class Layer():
         self.input_dim = input_dim
         self.n_units = n_units
         self.activation_function = activation_function_dict[activation_function]
-        self.weights_init = weights_init_dict[weights_init]
-        self.weights_initializer()
+        self.w = weights_init_dict[weights_init](self.input_dim, self.n_units)
+        self.b = weights_init_dict[weights_init](1, self.n_units)
         self.w_gradient = np.zeros((input_dim,n_units))
         self.b_gradient = np.zeros((1,n_units))
 
-    def weights_initializer(self):
-        self.w = self.weights_init.init(self.input_dim, self.n_units)
-        self.b = self.weights_init.init(1, self.n_units)
         
     def forward(self, input):
         self.input = input

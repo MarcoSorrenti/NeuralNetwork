@@ -2,13 +2,14 @@ import numpy as np
 from neuralnetwork.regularization import regularization_dict
 from neuralnetwork.utils.metrics import mse_loss, accuracy_bin
 from neuralnetwork.lr_decay import Linear_decay
+from neuralnetwork.utils.metrics import evaluation_metrics
 
-class Optimizer:
-    def __init__(self, model, loss, metric, lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=None, lr_decay=False):
+class SGD:
+    def __init__(self, model, loss='mse', eval_metric='accuracy', lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=None, lr_decay=False):
 
         self.model = model
-        self.loss = loss
-        self.metric = metric
+        self.loss = evaluation_metrics[loss]
+        self.eval_metric = evaluation_metrics[eval_metric]
         self.lr = lr
         self.momentum = momentum
         self.nesterov = nesterov
@@ -18,18 +19,16 @@ class Optimizer:
 
     def optimize(self, epochs, batch_size, X_train, y_train, X_valid=None, y_valid=None, es=False):
 
-        train_loss = []
-        train_accuracy = []
-        valid_loss = []
-        valid_accuracy = []
+        self.train_loss = []
+        self.train_accuracy = []
+        self.valid_loss = []
+        self.valid_accuracy = []
 
         for epoch in range(epochs):
 
             print("EPOCH {}:".format(epoch))
             epoch_loss = []
             epoch_accuracy = []
-
-            print(self.lr)
 
             for it, n in enumerate(range(0,len(X_train),batch_size)):
                 in_batch = X_train[n:n+batch_size]
@@ -74,52 +73,61 @@ class Optimizer:
             mean_loss = sum(epoch_loss) / len(epoch_loss)
             mean_accuracy = sum(epoch_accuracy) / len(epoch_accuracy)
             print("TRAINING || LOSS ---> {}\tACCURACY ---> {}".format(mean_loss, mean_accuracy))
+            self.train_loss.append(mean_loss)
+            self.train_accuracy.append(mean_accuracy)
 
-            #validation step
-            y_pred_valid = self.model.predict(X_valid)
-            mse_valid = mse_loss(y_valid, y_pred_valid)
-            acc_valid = accuracy_bin(y_valid, y_pred_valid)
-            print("VALIDATION || LOSS ---> {}\tACCURACY ---> {}".format(mse_valid, acc_valid))
+
             
+            if X_valid is not None:
 
-            #EARLY STOPPING
-            if X_valid is not None and y_valid is not None and es and epoch > es.patience:
-                if not es.check_stopping(self, mse_valid):
-                    print("ES: Training terminated.")
-                    return
+                #validation step
+                y_pred_valid = self.model.predict(X_valid)
+                mse_valid = self.loss(y_valid, y_pred_valid)
+                acc_valid = self.eval_metric(y_valid, y_pred_valid)
+                print("VALIDATION || LOSS ---> {}\tACCURACY ---> {}".format(mse_valid, acc_valid))
+
+                #EARLY STOPPING
+                if es and epoch > es.patience:
+                    if not es.check_stopping(self, mse_valid):
+                        self.model.history = {"train_loss":self.train_loss,"train_accuracy":self.train_accuracy,
+                                                "valid_loss":self.valid_loss,"valid_accuracy":self.valid_accuracy}
+                        print("ES: Training terminated.")
+                        return
 
             #metrics update
-            train_loss.append(mean_loss)
-            train_accuracy.append(mean_accuracy)
-            valid_loss.append(mse_valid)
-            valid_accuracy.append(acc_valid)
 
+                self.valid_loss.append(mse_valid)
+                self.valid_accuracy.append(acc_valid)
+
+            
             print("\n")
+            
+
+        self.model.history = {"train_loss":self.train_loss,"train_accuracy":self.train_accuracy,
+                                "valid_loss":self.valid_loss,"valid_accuracy":self.valid_accuracy}
 
 
 
 
 class EarlyStopping:
-    def __init__(self, monitor, patience, min_delta):
-        self.monitor = monitor
+    def __init__(self, patience, min_delta):
         self.patience = patience
         self.tol = patience
         self.min_delta = min_delta
 
-    def check_stopping(self, model, t_monitor):
+    def check_stopping(self, opt, t_monitor):
 
-        gain = model.valid_loss[-1] - t_monitor
+        gain = opt.valid_loss[-1] - t_monitor
         if gain < self.min_delta and self.tol > 0:
             self.tol -= 1
             print("ES: No improvement")
         else:
             self.tol = self.patience
-
+            
         if self.tol == 0:
             return 0
 
         return 1
 
 
-
-    
+optimizers = {'sgd':SGD}

@@ -11,7 +11,7 @@ class L1():
         return 2 * self.lambd * w_old
 
 class L2():
-    def __init__(self, lambd):
+    def __init__(self, lambd=0.001):
         self.lambd = lambd
 
     def compute(self, w):

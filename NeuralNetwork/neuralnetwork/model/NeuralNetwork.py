@@ -1,25 +1,12 @@
-import math
 import numpy as np
 from copy import deepcopy
-from neuralnetwork.lr_decay import Linear_decay
-from neuralnetwork.regularization import regularization_dict
 from neuralnetwork.utils.metrics import accuracy_bin, mse_loss
-from neuralnetwork.model.Optimizer import EarlyStopping
+from neuralnetwork.model.Optimizer import optimizers
 
 class NeuralNetwork():
-    def __init__(self, epochs=150, batch_size=64, lr=0.1, momentum=0.5, nesterov=False, regularization=None, lambd=0.001, lr_decay=False):
+    def __init__(self):
         self.layers = []
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.lr = lr
-        self.momentum = momentum
-        self.nesterov = nesterov
-        self.regularization = regularization_dict[regularization](lambd) if regularization is not None else None
-        self.lr_decay = Linear_decay(self.lr) if lr_decay else False
-        self.loss = []
-        self.accuracy = []
-        self.valid_loss = []
-        self.valid_accuracy = []
+        self.history = dict()
 
     def add_layer(self, layer):
         self.layers.append(layer)
@@ -29,8 +16,8 @@ class NeuralNetwork():
         penalty_term = 0
         for layer in self.layers:           
             output = layer.forward(output)
-            if self.regularization is not None:
-                penalty_term += self.regularization.compute(layer.w)
+            if self.optimizer.regularization is not None:
+                penalty_term += self.optimizer.regularization.compute(layer.w)
         return output, penalty_term
 
 
@@ -45,79 +32,23 @@ class NeuralNetwork():
 
         return acc, mse
 
+    def compile(self, opt='sgd', loss='mse', metric='accuracy', lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=0.001, lr_decay=False):
 
-    def fit(self, X_train, y_train, X_valid=None, y_valid=None, es=False):
+        self.optimizer = optimizers[opt](model=self, 
+                                    loss=loss,
+                                    eval_metric=metric,
+                                    lr=lr,
+                                    momentum=momentum, 
+                                    nesterov=nesterov, 
+                                    reg_type=reg_type, 
+                                    lambd=lambd, 
+                                    lr_decay=lr_decay)
+
+
+    def fit(self, epochs=200, batch_size=128, X_train=None, y_train=None, X_valid=None, y_valid=None, es=False):
         
-        X_train = X_train
-        y_train = y_train
-
-        for epoch in range(self.epochs):
-            print("EPOCH {}:".format(epoch))
-            epoch_loss = []
-            epoch_accuracy = []
-
-            for it, n in enumerate(range(0,len(X_train),self.batch_size)):
-                in_batch = X_train[n:n+self.batch_size]
-                out_batch = y_train[n:n+self.batch_size]
-
-                if self.nesterov:
-                    for layer in self.layers:
-                        layer.w = np.add(layer.w, self.momentum*layer.old_w_gradient)
-                        layer.b = np.add(layer.b, self.momentum*layer.old_b_gradient)
-
-                accuracy, mse = self.backprop(in_batch, out_batch)
-                
-                #OPTIMIZATION
-                for layer in self.layers:
-                    layer.w_gradient /= self.batch_size
-                    layer.b_gradient /= self.batch_size
-                    delta_w = layer.w_gradient * self.lr
-                    delta_b = layer.b_gradient * self.lr
-                    layer.w_gradient = np.add(delta_w, layer.old_w_gradient*self.momentum)
-                    layer.b_gradient = np.add(delta_b, layer.old_b_gradient*self.momentum)
-                    if self.regularization is not None:
-                        layer.w = np.add(layer.w, layer.w_gradient - self.regularization.derivate(layer.w))
-                    else:
-                        layer.w = np.add(layer.w, layer.w_gradient)
-                    layer.b = np.add(layer.b, layer.b_gradient)
-
-
-                #batch evaluation
-                print("{} \\\\ Loss:\t{}\tAccuracy:\t{}".format(it + 1, mse, accuracy))
-                epoch_loss.append(mse)
-                epoch_accuracy.append(accuracy)
-            
-
-            #lr decay
-            if self.lr_decay:
-                self.lr = self.lr_decay.decay(epoch)
-
-            #epoch evaluation
-            mean_loss = sum(epoch_loss) / len(epoch_loss)
-            mean_accuracy = sum(epoch_accuracy) / len(epoch_accuracy)
-            print("TRAINING || LOSS ---> {}\tACCURACY ---> {}".format(mean_loss, mean_accuracy))
-
-            #validation step
-            y_pred_valid = self.predict(X_valid)
-            mse_valid = mse_loss(y_valid, y_pred_valid)
-            acc_valid = accuracy_bin(y_valid, y_pred_valid)
-            print("VALIDATION || LOSS ---> {}\tACCURACY ---> {}".format(mse_valid, acc_valid))
-
-
-            #EARLY STOPPING
-            if X_valid is not None and y_valid is not None and epoch > es.patience:
-                if not es.check_stopping(self, mse_valid):
-                    print("ES: Training terminated.")
-                    return
-
-
-            #metrics update
-            self.loss.append(mean_loss)
-            self.accuracy.append(mean_accuracy)
-            self.valid_loss.append(mse_valid)
-            self.valid_accuracy.append(acc_valid)
-
-            print("\n")
+        self.optimizer.optimize(epochs=epochs, batch_size=batch_size, X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid, es=es)
+        
 
 
     def predict(self, x_test):

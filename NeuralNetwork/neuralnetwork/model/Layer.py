@@ -13,6 +13,8 @@ class Layer():
         self.b = weights_init_dict[weights_init](1, self.n_units)
         self.w_gradient = np.zeros((input_dim,n_units))
         self.b_gradient = np.zeros((1,n_units))
+        self.old_w_gradient = np.zeros((input_dim,n_units))
+        self.old_b_gradient = np.zeros((1,n_units))
 
         
     def forward(self, input):

@@ -1,6 +1,7 @@
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+from neuralnetwork.model.Optimizer import EarlyStopping
 from neuralnetwork.datasets.util import load_monk
 from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork
@@ -14,14 +15,16 @@ X_train, X_test, y_train, y_test = load_monk(3)
 n_features = X_train.shape[1]
 
 batch_size = len(X_train)
-model = NeuralNetwork(epochs=300,batch_size=batch_size, lr=0.5,momentum=0.8)
+model = NeuralNetwork(epochs=500,batch_size=batch_size, lr=0.4,momentum=0.6,nesterov=True,regularization=None,lr_decay=True)
 input_layer = Layer(n_features,3, activation_function='relu', weights_init='random_init')
 hidden_layer = Layer(3,1, activation_function='sigmoid', weights_init='xavier_uniform')
 model.add_layer(input_layer)
 model.add_layer(hidden_layer)
-model.fit(X_train, y_train, X_test, y_test)
 
-fig, (ax1, ax2) = plt.subplots(1,2)
+es = EarlyStopping('loss',10,1e-6)
+model.fit(X_train, y_train, X_test, y_test, es=es)
+
+fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15,7))
 ax1.plot(model.loss, label='train')
 ax1.plot(model.valid_loss, color='r', label='valid')
 ax2.plot(model.accuracy, label='train')

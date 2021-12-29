@@ -4,10 +4,16 @@ from neuralnetwork.model.Optimizer import EarlyStopping
 from neuralnetwork.datasets.util import load_monk
 from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork
+from neuralnetwork.model_selection.model_selection import KFoldCV
 
 
 
 X_train, X_test, y_train, y_test = load_monk(1)
+
+kf = KFoldCV(folds=20)
+kfold = kf.split(X_train, y_train)
+for elem in kfold:
+    print(elem)
 
 n_features = X_train.shape[1]
 batch_size = len(X_train)

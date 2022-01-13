@@ -2,6 +2,7 @@ import numpy as np
 from copy import deepcopy
 from neuralnetwork.utils.metrics import accuracy_bin, mse_loss
 from neuralnetwork.model.Optimizer import optimizers
+from neuralnetwork.model.Layer import Layer
 
 class NeuralNetwork():
     def __init__(self):
@@ -32,6 +33,7 @@ class NeuralNetwork():
 
         return acc, mse
 
+
     def compile(self, opt='sgd', loss='mse', metric='accuracy', lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=0.001, lr_decay=False):
 
         self.optimizer = optimizers[opt](model=self, 
@@ -44,11 +46,15 @@ class NeuralNetwork():
                                     lambd=lambd, 
                                     lr_decay=lr_decay)
 
+        #model autosave before fit for cv
+        #self._compiled_model = self.copy_model()
+
 
     def fit(self, epochs=200, batch_size=128, X_train=None, y_train=None, X_valid=None, y_valid=None, es=False):
         
         self.optimizer.optimize(epochs=epochs, batch_size=batch_size, X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid, es=es)
         
+        return self.history
 
 
     def predict(self, x_test):
@@ -56,3 +62,46 @@ class NeuralNetwork():
         output, _ = model.feedForward(x_test)
         return output
 
+
+    def summary(self):
+
+        print(" MODEL ".center(35,' '))
+        print("-"*35)
+        print("{: >21}{: >11}".format("Input","Output"))
+        print("-"*35)
+        for i,layer in enumerate(self.layers):
+            print("Layer_{}: {: >10} {: >10}".format(i, layer.input_dim, layer.n_units), sep='\t')
+            print("—"*35)
+
+
+    def copy_model(self):
+        return deepcopy(self)
+
+
+
+
+
+
+
+def build_model(n_features, layers_params:list):
+    '''Neural Network builder class
+
+    Args: 
+        n_features: number of input features.
+        layers_params: list of layers, where a layer is a dictionary of Layer constructor's parameters
+    Returns:
+        model: NN class model, ready to be compiled and fitted
+    
+    '''
+
+    model = NeuralNetwork()
+
+    input_layer = Layer(n_features, **layers_params[0])
+    model.add_layer(input_layer)
+    n = input_layer.n_units
+    for i in range(1,len(layers_params)):
+        layer = Layer(n, **layers_params[i])
+        n = layer.n_units
+        model.add_layer(layer)
+
+    return model

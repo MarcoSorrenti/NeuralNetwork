@@ -3,19 +3,15 @@ import matplotlib.pyplot as plt
 from neuralnetwork.model.Optimizer import EarlyStopping
 from neuralnetwork.datasets.util import load_monk
 from neuralnetwork.model.Layer import Layer
-from neuralnetwork.model.NeuralNetwork import NeuralNetwork
-from neuralnetwork.model_selection.model_selection import KFoldCV
+from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
+from neuralnetwork.model_selection import KFoldCV
 
 
 
 X_train, X_test, y_train, y_test = load_monk(1)
 
-kf = KFoldCV(folds=20)
-kfold = kf.split(X_train, y_train)
-for elem in kfold:
-    print(elem)
-
 n_features = X_train.shape[1]
+'''
 batch_size = len(X_train)
 
 model = NeuralNetwork()
@@ -38,4 +34,19 @@ ax2.plot(model.history['valid_accuracy'], color='r', label='valid_acc')
 ax1.legend()
 ax2.legend()
 plt.show()
+
+'''
+
+
+#
+
+params = [{"n_units":5,"activation_function":'relu', "weights_init":'random_init'},
+            {"n_units":5,"activation_function":'relu', "weights_init":'random_init'},
+            {"n_units":1,"activation_function":'sigmoid',"weights_init":'random_init'}]
+
+NN = build_model(n_features=17, layers_params=params)
+NN.compile('sgd', loss='mse', metric='accuracy',lr=0.5,momentum=0.8,reg_type=None,lr_decay=False,nesterov=False)
+cv = KFoldCV(NN, X_train, y_train, 3, epochs=10)
+print(cv._results, sep='\n')
+
 

@@ -23,6 +23,7 @@ def load_monk(problem):
 
     return X_train, X_test, y_train, y_test
 
+
 def split_data(dataset):
     dataset = dataset.iloc[:,:-1]
     #monk_train = monk_train.sample(frac=1, random_state=42)

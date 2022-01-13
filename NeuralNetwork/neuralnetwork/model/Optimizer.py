@@ -1,7 +1,7 @@
 import numpy as np
-from neuralnetwork.regularization import regularization_dict
+from neuralnetwork.utils.regularization import regularization_dict
 from neuralnetwork.utils.metrics import mse_loss, accuracy_bin
-from neuralnetwork.lr_decay import Linear_decay
+from neuralnetwork.utils.lr_decay import Linear_decay
 from neuralnetwork.utils.metrics import evaluation_metrics
 
 class SGD:

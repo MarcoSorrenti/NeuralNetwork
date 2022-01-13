@@ -1,7 +1,7 @@
 import numpy as np
 from copy import deepcopy
-from neuralnetwork.weights_initalizer import weights_init_dict
-from neuralnetwork.activation import activation_function_dict
+from neuralnetwork.utils.weights_initalizer import weights_init_dict
+from neuralnetwork.utils.activation import activation_function_dict
 
 
 class Layer():
@@ -38,8 +38,3 @@ class Layer():
         error_j = np.dot(delta,self.w.T)
 
         return error_j
-
-
-
-
-

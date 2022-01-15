@@ -41,7 +41,7 @@ class SGD:
                         layer.b = np.add(layer.b, self.momentum*layer.old_b_gradient)
 
                 #gradient computation
-                accuracy, mse = self.model.backprop(in_batch, out_batch)
+                eval_metric, loss = self.model.backprop(in_batch, out_batch)
                 
                 #OPTIMIZATION
                 for layer in self.model.layers:
@@ -60,9 +60,9 @@ class SGD:
 
 
                 #batch evaluation
-                print("{} \\\\ Loss:\t{}\tAccuracy:\t{}".format(it + 1, mse, accuracy))
-                epoch_loss.append(mse)
-                epoch_accuracy.append(accuracy)
+                print("{} \\\\ Loss:\t{}\tAccuracy:\t{}".format(it + 1, loss, eval_metric))
+                epoch_loss.append(loss)
+                epoch_accuracy.append(eval_metric)
             
 
             #lr decay

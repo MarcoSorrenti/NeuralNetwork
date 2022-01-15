@@ -25,13 +25,13 @@ class NeuralNetwork():
     def backprop(self, input, y_true):
         y_pred, penalty_term = self.feedForward(input)
         error = y_true - y_pred
-        mse = mse_loss(y_true, y_pred) + penalty_term
-        acc = accuracy_bin(y_true, y_pred)
+        mse = self.optimizer.loss(y_true, y_pred) + penalty_term
+        eval_metric = self.optimizer.eval_metric(y_true, y_pred)
 
         for layer in reversed(self.layers):
             error = layer.backward(error)
 
-        return acc, mse
+        return eval_metric, mse
 
 
     def compile(self, opt='sgd', loss='mse', metric='accuracy', lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=0.001, lr_decay=False):
@@ -45,6 +45,8 @@ class NeuralNetwork():
                                     reg_type=reg_type, 
                                     lambd=lambd, 
                                     lr_decay=lr_decay)
+
+        self.backup_opt = self.optimizer
 
         #model autosave before fit for cv
         #self._compiled_model = self.copy_model()
@@ -61,6 +63,16 @@ class NeuralNetwork():
         model = deepcopy(self)
         output, _ = model.feedForward(x_test)
         return output
+
+
+
+    def reset_model(self):
+        for layer in self.layers:
+            layer.set_parameters()
+
+        self.optimizer = self.backup_opt
+
+        self.history = dict()
 
 
     def summary(self):
@@ -81,12 +93,12 @@ class NeuralNetwork():
 
 
 
-
+#model building
 
 def build_model(n_features, layers_params:list):
     '''Neural Network builder class
 
-    Args: 
+    Args:
         n_features: number of input features.
         layers_params: list of layers, where a layer is a dictionary of Layer constructor's parameters
     Returns:

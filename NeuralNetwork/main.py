@@ -1,18 +1,21 @@
+from os import sep
 import numpy as np
 import matplotlib.pyplot as plt
 from neuralnetwork.model.Optimizer import EarlyStopping
-from neuralnetwork.datasets.util import load_monk
+from neuralnetwork.datasets.util import load_monk, load_cup
 from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV
 
 
 
-X_train, X_test, y_train, y_test = load_monk(1)
+#X_train, X_test, y_train, y_test = load_monk(1)
+X_train, X_test, y_train, y_test = load_cup()
 
 n_features = X_train.shape[1]
-'''
 batch_size = len(X_train)
+
+'''
 
 model = NeuralNetwork()
 input_layer = Layer(n_features,3, activation_function='relu', weights_init='random_init')
@@ -38,15 +41,19 @@ plt.show()
 '''
 
 
-#
+params = [{"n_units":30,"activation_function":'relu', "weights_init":'xavier_uniform'},
+            {"n_units":30,"activation_function":'relu', "weights_init":'xavier_uniform'},
+            {"n_units":30,"activation_function":'relu', "weights_init":'xavier_uniform'},
+            {"n_units":2,"activation_function":'linear',"weights_init":'xavier_uniform'}]
 
-params = [{"n_units":5,"activation_function":'relu', "weights_init":'random_init'},
-            {"n_units":5,"activation_function":'relu', "weights_init":'random_init'},
-            {"n_units":1,"activation_function":'sigmoid',"weights_init":'random_init'}]
+NN = build_model(n_features=10, layers_params=params)
+NN.compile('sgd', loss='mse', metric='mee',lr=0.001,momentum=0.9,reg_type=None,lr_decay=True,nesterov=False)
+cv = KFoldCV(NN, X_train, y_train, 4, epochs=100, batch_size=batch_size)
+#print(*((x,y) for x,y in cv._results.items()), sep='\n\n')
 
-NN = build_model(n_features=17, layers_params=params)
-NN.compile('sgd', loss='mse', metric='accuracy',lr=0.5,momentum=0.8,reg_type=None,lr_decay=False,nesterov=False)
-cv = KFoldCV(NN, X_train, y_train, 3, epochs=10)
-print(cv._results, sep='\n')
+
+
+
+
 
 

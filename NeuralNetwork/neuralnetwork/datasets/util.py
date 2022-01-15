@@ -1,6 +1,7 @@
+from email import header
+from email.quoprimime import header_decode
 import pandas as pd
 import numpy as np
-
 
 
 def load_monk(problem):
@@ -18,13 +19,13 @@ def load_monk(problem):
         skipinitialspace=True
         )
 
-    X_train, y_train = split_data(monk_train)
-    X_test, y_test = split_data(monk_test)
+    X_train, y_train = split_monk_data(monk_train)
+    X_test, y_test = split_monk_data(monk_test)
 
     return X_train, X_test, y_train, y_test
 
 
-def split_data(dataset):
+def split_monk_data(dataset):
     dataset = dataset.iloc[:,:-1]
     #monk_train = monk_train.sample(frac=1, random_state=42)
 
@@ -36,5 +37,21 @@ def split_data(dataset):
     y = np.array(y).reshape(-1,1)
 
     return X, y 
+
+
+
+def load_cup():
+    cup_folder = "C:\\Users\\Jacopo\\Desktop\\Jacopo\\Informatica Umanistica\\Machine_learning\\ML2021\\NNProject\\NeuralNetwork\\Info_exam"
+    train_file = "\\ML-CUP21-TR.csv"
+    test_file = "\\ML-CUP21-TS.csv"
+    cup_train = pd.read_csv(cup_folder + train_file, skiprows=7, header=None, index_col=0)
+    cup_test = pd.read_csv(cup_folder + test_file, skiprows=7, header=None, index_col=0)
+
+    X_train = np.array(cup_train.iloc[:,:10])
+    y_train = np.array(cup_train.iloc[:,-2:])
+    X_test = np.array(cup_test.iloc[:,:10])
+    y_test = np.array(cup_test.iloc[:,-2:])
+
+    return X_train, X_test, y_train, y_test
 
     

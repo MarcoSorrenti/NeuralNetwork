@@ -12,8 +12,9 @@ def accuracy_bin(y_true, y_preds):
     return np.round(np.equal(y_true, y_preds).mean(),8) *100
 
 
+
 evaluation_metrics = {
     'mse':mse_loss,
     'mee':mee_loss,
-    'accuracy':accuracy_bin
+    'accuracy':accuracy_bin,
 }

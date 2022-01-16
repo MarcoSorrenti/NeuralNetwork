@@ -26,7 +26,7 @@ class NeuralNetwork():
         y_pred, penalty_term = self.feedForward(input)
         error = y_true - y_pred
         mse = self.optimizer.loss(y_true, y_pred) + penalty_term
-        eval_metric = self.optimizer.eval_metric(y_true, y_pred)
+        eval_metric = self.optimizer.eval_metric(y_true, y_pred) if self.optimizer.eval_metric else None
 
         for layer in reversed(self.layers):
             error = layer.backward(error)
@@ -34,7 +34,7 @@ class NeuralNetwork():
         return eval_metric, mse
 
 
-    def compile(self, opt='sgd', loss='mse', metric='accuracy', lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=0.001, lr_decay=False):
+    def compile(self, opt='sgd', loss='mse', metric=None, lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=0.001, lr_decay=False):
 
         self.optimizer = optimizers[opt](model=self, 
                                     loss=loss,

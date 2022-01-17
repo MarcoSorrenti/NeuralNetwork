@@ -2,26 +2,27 @@ import os, pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from neuralnetwork.model.Optimizer import EarlyStopping
-from neuralnetwork.datasets.util import load_monk, load_cup
+from neuralnetwork.datasets.util import load_monk, load_cup, train_test_split
 from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN
 
 
 
-import warnings
-warnings.filterwarnings("ignore")
-
 #X_train, X_test, y_train, y_test = load_monk(1)
-X_train, X_test, y_train, y_test = load_cup()
+X_train, X_test_blind, y_train, y_test_blind = load_cup()
+print(len(X_train),len(y_train))
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train)
+
+print(len(X_train),len(X_test),len(y_train),len(y_test))
+
 
 n_features = X_train.shape[1]
 batch = len(X_train)
 
-
 run_grid = False
 
-if not os.path.isfile('best_config.pickle') or run_grid:
+if not os.path.isfile('/NeuralNetwork/best_config.pickle') or run_grid:
 
     params_config = {
                 'n_features': [n_features],
@@ -44,20 +45,20 @@ if not os.path.isfile('best_config.pickle') or run_grid:
     gs_results = sorted(gs.grid_results, key = lambda i: (i['mean_error_valid'], i['st_dev_valid'],i['time']))
     best_config = gs_results[0]['parameters']
 
-    with open('best_config.pickle', 'wb') as handle:
+    with open('/NeuralNetwork/best_config.pickle', 'wb') as handle:
         pickle.dump(best_config, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 
-with open('best_config.pickle', 'rb') as handle:
+with open('/NeuralNetwork/best_config.pickle', 'rb') as handle:
     best_config = pickle.load(handle)
 
 
 model = build_model(best_config)
 model.summary()
 model.compile('sgd',
-                loss='mse',
-                lr=0.02,
+                loss='mee',
+                lr=best_config['lr'],
                 momentum=best_config['momentum'],
                 reg_type=best_config['reg_type'],
                 lr_decay=best_config['lr_decay'],

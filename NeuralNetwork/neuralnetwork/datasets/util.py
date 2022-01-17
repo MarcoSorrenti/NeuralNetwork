@@ -3,6 +3,7 @@ from email.quoprimime import header_decode
 import pandas as pd
 import numpy as np
 
+
 def load_monk(problem):
     monk_train = pd.read_csv(
         "http://archive.ics.uci.edu/ml/machine-learning-databases/monks-problems/monks-{}.train".format(problem),
@@ -53,4 +54,10 @@ def load_cup():
 
     return X_train, X_test, y_train, y_test
 
-    
+
+def train_test_split(X, y, test_size=0.2):
+    index_split = int(np.floor(len(X)*(1-test_size)))
+    X_train, X_test = X[:index_split],X[index_split:]
+    y_train, y_test = y[:index_split],y[index_split:]
+
+    return X_train, X_test, y_train, y_test

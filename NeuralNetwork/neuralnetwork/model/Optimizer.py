@@ -92,9 +92,9 @@ class SGD:
 
                 #validation step
                 y_pred_valid = self.model.predict(X_valid)
-                mse_valid = self.loss(y_valid, y_pred_valid)
-                self.valid_loss.append(mse_valid)
-                print("VALIDATION || Loss ---> {}".format(mse_valid),end="    ")
+                loss_valid = self.loss(y_valid, y_pred_valid)
+                self.valid_loss.append(loss_valid)
+                print("VALIDATION || Loss ---> {}".format(loss_valid),end="    ")
 
                 if self.eval_metric : 
                     eval_metric_valid = self.eval_metric(y_valid, y_pred_valid)
@@ -103,7 +103,7 @@ class SGD:
 
                 #EARLY STOPPING
                 if es and epoch > es.patience:
-                    if not es.check_stopping(self, mse_valid):
+                    if not es.check_stopping(self, loss_valid):
                         self.model.history = {"train_loss":self.train_loss,"valid_loss":self.valid_loss}
 
                         if self.eval_metric:

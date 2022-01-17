@@ -59,7 +59,8 @@ model.compile('sgd',
                 momentum=best_config['momentum'],
                 reg_type=best_config['reg_type'],
                 lr_decay=best_config['lr_decay'],
-                nesterov=best_config['nesterov'])
+                nesterov=best_config['nesterov'],
+                lambd=best_config['lambda'])
 
 #es = EarlyStopping(10,1e-15)
 model.fit(epochs=200,batch_size=best_config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test)

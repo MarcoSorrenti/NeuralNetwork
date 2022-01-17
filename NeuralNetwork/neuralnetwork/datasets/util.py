@@ -3,7 +3,6 @@ from email.quoprimime import header_decode
 import pandas as pd
 import numpy as np
 
-
 def load_monk(problem):
     monk_train = pd.read_csv(
         "http://archive.ics.uci.edu/ml/machine-learning-databases/monks-problems/monks-{}.train".format(problem),
@@ -41,9 +40,9 @@ def split_monk_data(dataset):
 
 
 def load_cup():
-    cup_folder = "C:\\Users\\Jacopo\\Desktop\\Jacopo\\Informatica Umanistica\\Machine_learning\\ML2021\\NNProject\\NeuralNetwork\\Info_exam"
-    train_file = "\\ML-CUP21-TR.csv"
-    test_file = "\\ML-CUP21-TS.csv"
+    cup_folder = "NeuralNetwork/neuralnetwork/datasets/"
+    train_file = "ML-CUP21-TR.csv"
+    test_file = "ML-CUP21-TS.csv"
     cup_train = pd.read_csv(cup_folder + train_file, skiprows=7, header=None, index_col=0)
     cup_test = pd.read_csv(cup_folder + test_file, skiprows=7, header=None, index_col=0)
 

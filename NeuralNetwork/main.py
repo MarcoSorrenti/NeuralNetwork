@@ -6,8 +6,6 @@ from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN
 
-
-
 #X_train, X_test, y_train, y_test = load_monk(1)
 X_train, X_test, y_train, y_test = load_cup()
 

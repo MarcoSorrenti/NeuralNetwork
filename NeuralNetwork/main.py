@@ -18,7 +18,10 @@ X_train, X_test, y_train, y_test = load_cup()
 n_features = X_train.shape[1]
 batch = len(X_train)
 
-if not os.path.isfile('./best_config.pickle'):
+
+run_grid = False
+
+if not os.path.isfile('best_config.pickle') or run_grid:
 
     params_config = {
                 'n_features': [n_features],
@@ -47,27 +50,24 @@ if not os.path.isfile('./best_config.pickle'):
 
 
 with open('best_config.pickle', 'rb') as handle:
-    b = pickle.load(handle)
+    best_config = pickle.load(handle)
 
 
 model = build_model(best_config)
+model.summary()
 model.compile('sgd',
                 loss='mse',
-                lr=best_config['lr'],
+                lr=0.02,
                 momentum=best_config['momentum'],
                 reg_type=best_config['reg_type'],
                 lr_decay=best_config['lr_decay'],
                 nesterov=best_config['nesterov'])
 
-es = EarlyStopping(10,1e-7)
-model.fit(epochs=500,batch_size=best_config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test)
+#es = EarlyStopping(10,1e-15)
+model.fit(epochs=200,batch_size=best_config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test)
 
-fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15,7))
-ax1.plot(model.history['train_loss'], label='train_loss')
-ax1.plot(model.history['valid_loss'], color='r', label='valid_loss')
-ax2.plot(model.history['train_accuracy'], label='train_acc')
-ax2.plot(model.history['valid_accuracy'], color='r', label='valid_acc')
-
-ax1.legend()
-ax2.legend()
+plt.figure(figsize=(15,7))
+plt.plot(model.history['train_loss'], label='train_loss')
+plt.plot(model.history['valid_loss'], color='r', label='valid_loss')
+plt.legend()
 plt.show()

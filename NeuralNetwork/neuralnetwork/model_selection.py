@@ -6,6 +6,9 @@ from copy import deepcopy
 from itertools import product
 from timeit import default_timer as timer
 
+import warnings
+warnings.filterwarnings('ignore')
+
 class KFoldCV:
     def __init__(self, model:NeuralNetwork, X, y, k_folds=5, epochs=400, batch_size=128, shuffle=False):
         self.X = X
@@ -98,7 +101,8 @@ class GridSearchCVNN:
                             momentum=config['momentum'],
                             reg_type=config['reg_type'],
                             lr_decay=config['lr_decay'],
-                            nesterov=config['nesterov'])
+                            nesterov=config['nesterov'],
+                            lambd=config['lambda'])
 
             cv = KFoldCV(model, X=X, y=y, k_folds=k_folds, epochs=epochs, batch_size=config['batch_size'], shuffle=shuffle)
 

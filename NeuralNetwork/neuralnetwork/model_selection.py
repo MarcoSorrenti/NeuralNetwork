@@ -1,9 +1,10 @@
-from os import error
+import os, sys
 import numpy as np
-from random import randrange
 from tqdm import tqdm
-from neuralnetwork.model.NeuralNetwork import NeuralNetwork
+from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from copy import deepcopy
+from itertools import product
+from timeit import default_timer as timer
 
 class KFoldCV:
     def __init__(self, model:NeuralNetwork, X, y, k_folds=5, epochs=400, batch_size=128, shuffle=False):
@@ -15,25 +16,34 @@ class KFoldCV:
         self.x_folds = np.array_split(X, k_folds)
         self.y_folds = np.array_split(y, k_folds)
 
-        self._results = dict()
+        self.cv_loss = list()
         self.model = model
 
         for i in range(k_folds):
             X_train, y_train, X_valid, y_valid = self.get_folds(i)
 
             try:
-                history = self.model.fit(epochs=epochs,batch_size=batch_size,X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid)
+                with HiddenPrints():
+                    history = self.model.fit(epochs=epochs,batch_size=batch_size,X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid)
 
-                self._results.update({'split_{}'.format(i+1):history})
+                loss = history['valid_loss'][-1]
+                self.cv_loss.append(loss)
 
-            except error:
+            except os.error:
                 print("Error in training at iteration {}.".format(i))
-                print(error)
+                print(os.error)
                 continue
+
+            print("[CV {}/{}]\tSCORE: {}".format(i+1,k_folds,loss))
 
             #get a pre-fit copy of the default model, built and compiled
             self.model.reset_model()
 
+
+        self.mean_valid_loss = np.mean(self.cv_loss)
+        self.st_dev = np.std(self.cv_loss)
+
+        
 
     def get_folds(self, val_fold_id):
         #implement stratification for classification
@@ -50,34 +60,62 @@ class KFoldCV:
 
     
     def shuffle(self):
-        self.X = np.random.shuffle(self.X)
-        self.y = np.random.shuffle(self.y)
+        self.X = np.random.permutation(self.X)
+        self.y = np.random.permutation(self.y)
 
 
 
 
-class KFoldCVRob:
-
-    def __init__(self, folds=4):
-        self.folds = folds
-
-    def split(self, X, y):
-        ds_split = list()
-        X = X
-        fold_size = len(X) / self.folds
-
-        for i in range(self.folds):
-            fold = []
-            while len(fold) < fold_size:
-                index = randrange(len(X))
-                fold.append(X[index])
-                np.delete(X, index)
-            ds_split.append(fold)
-
-        return ds_split
+class GridSearchCVNN:
+    def __init__(self, params_grid:dict):
+        self.param_grid = params_grid
+        self.configurations = list(product(*params_grid.values()))
+        self.grid_results = list()
 
 
+    def fit(self, X, y, loss='mse', scoring=None, k_folds=4, epochs=100, shuffle=False):
+
+        print("Fitting {} folds for each of {} parameters configurations".format(k_folds, len(self.configurations)))
+
+        
+        for i,config in enumerate(self.configurations):
 
 
+            start = timer()    
+            config = {key:value for key,value in zip(self.param_grid.keys(), config)}
+            
+            print("Configuration {}:\t{}".format(i+1, config))
 
+            model = build_model(config)
+            model.compile('sgd', 
+                            loss=loss, 
+                            metric=scoring, 
+                            lr=config['lr'],
+                            momentum=config['momentum'],
+                            reg_type=config['reg_type'],
+                            lr_decay=config['lr_decay'],
+                            nesterov=config['nesterov'])
+
+            cv = KFoldCV(model, X=X, y=y, k_folds=k_folds, epochs=epochs, batch_size=config['batch_size'], shuffle=shuffle)
+
+            end = timer()
+            time_it = end-start
+
+            self.grid_results.append({  'parameters':config,
+                                        'mean_valid_error':cv.mean_valid_loss,
+                                        'st_dev_valid':cv.st_dev,
+                                        'time':time_it,
+                                        })
+
+
+            
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 

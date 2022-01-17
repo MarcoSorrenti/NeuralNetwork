@@ -62,8 +62,8 @@ class SGD:
                     layer.b = np.add(layer.b, layer.b_gradient)
 
                 #batch evaluation
-                if it > 0:
-                    print("{} \\\\ Loss:\t{}".format(it + 1, loss), end="")
+                if batch_size < X_train.shape[0]:
+                    print("{} \\\\ Loss:\t{}".format(it + 1, loss), end="\n")
 
                     if self.eval_metric : print("{}:\t{}".format(self.eval_metric_text.title(), eval_metric))
 

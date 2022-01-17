@@ -95,7 +95,7 @@ class NeuralNetwork():
 
 #model building
 
-def build_model(n_features, layers_params:list):
+def build_model(layers_params:dict):
     '''Neural Network builder class
 
     Args:
@@ -105,15 +105,31 @@ def build_model(n_features, layers_params:list):
         model: NN class model, ready to be compiled and fitted
     
     '''
-
     model = NeuralNetwork()
 
-    input_layer = Layer(n_features, **layers_params[0])
+    #input layer
+    input_layer = Layer(layers_params['n_features'], 
+                        layers_params['n_units'], 
+                        activation_function=layers_params['hidden_act'], 
+                        weights_init=layers_params['weights_init'])
     model.add_layer(input_layer)
-    n = input_layer.n_units
-    for i in range(1,len(layers_params)):
-        layer = Layer(n, **layers_params[i])
-        n = layer.n_units
+    in_units = input_layer.n_units
+
+    #hidden layers
+    for i in range(layers_params['n_hidden_layers']):
+        layer = Layer(in_units, 
+                        layers_params['n_units'], 
+                        activation_function=layers_params['hidden_act'],
+                        weights_init=layers_params['weights_init'])
+        in_units = layer.n_units
         model.add_layer(layer)
+
+    #output_layer
+    layer = Layer(in_units, 
+                    layers_params['out_units'], 
+                    activation_function=layers_params['out_act'],
+                    weights_init=layers_params['weights_init'])
+    in_units = layer.n_units
+    model.add_layer(layer)
 
     return model

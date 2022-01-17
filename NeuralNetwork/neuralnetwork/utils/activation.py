@@ -43,6 +43,13 @@ class Relu(Activation):
     def derivative(self, x):
         return (x > 0).astype(int) # if x > 0 return 1 else 0
 
+class LeakyRelu(Activation):
+    def evaluate(self, x):
+        return 
+
+    def derivative(self, x):
+        return 
+
 class Softmax(Activation):
     def evaluate(self, x):
         return np.exp(x) / np.sum(np.exp(x), axis=1)

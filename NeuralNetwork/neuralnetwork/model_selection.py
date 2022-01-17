@@ -16,7 +16,8 @@ class KFoldCV:
         self.x_folds = np.array_split(X, k_folds)
         self.y_folds = np.array_split(y, k_folds)
 
-        self.cv_loss = list()
+        self.cv_valid_loss = list()
+        self.cv_train_loss = list()
         self.model = model
 
         for i in range(k_folds):
@@ -26,22 +27,25 @@ class KFoldCV:
                 with HiddenPrints():
                     history = self.model.fit(epochs=epochs,batch_size=batch_size,X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid)
 
-                loss = history['valid_loss'][-1]
-                self.cv_loss.append(loss)
+                train_loss = history['train_loss'][-1]
+                val_loss = history['valid_loss'][-1]
+                self.cv_train_loss.append(train_loss)
+                self.cv_valid_loss.append(val_loss)
 
             except os.error:
                 print("Error in training at iteration {}.".format(i))
                 print(os.error)
                 continue
 
-            print("[CV {}/{}]\tSCORE: {}".format(i+1,k_folds,loss))
+            print("[CV {}/{}]\tSCORE --> T: {}\tV: {}".format(i+1,k_folds,train_loss,val_loss))
 
             #get a pre-fit copy of the default model, built and compiled
             self.model.reset_model()
 
-
-        self.mean_valid_loss = np.mean(self.cv_loss)
-        self.st_dev = np.std(self.cv_loss)
+        self.mean_train_loss = np.mean(self.cv_train_loss)
+        self.st_dev_train = np.std(self.cv_train_loss)
+        self.mean_valid_loss = np.mean(self.cv_valid_loss)
+        self.st_dev_valid = np.std(self.cv_valid_loss)
 
         
 
@@ -102,8 +106,10 @@ class GridSearchCVNN:
             time_it = end-start
 
             self.grid_results.append({  'parameters':config,
-                                        'mean_valid_error':cv.mean_valid_loss,
-                                        'st_dev_valid':cv.st_dev,
+                                        'mean_error_train':cv.mean_train_loss,
+                                        'mean_error_valid':cv.mean_valid_loss,
+                                        'st_dev_train':cv.st_dev_train,
+                                        'st_dev_valid':cv.st_dev_valid,
                                         'time':time_it,
                                         })
 

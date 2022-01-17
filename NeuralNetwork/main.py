@@ -6,6 +6,9 @@ from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN
 
+import warnings
+warnings.filterwarnings("ignore")
+
 #X_train, X_test, y_train, y_test = load_monk(1)
 X_train, X_test, y_train, y_test = load_cup()
 
@@ -36,32 +39,21 @@ plt.show()
 
 params_config = {
             'n_features': [n_features],
-            'n_hidden_layers':[3,4,5],
+            'n_hidden_layers':[3,5],
             'n_units':[10,20,30],
-            'batch_size':[64, 128, 256],
+            'batch_size':[128, 256],
             'out_units':[2],
             'hidden_act':['relu'],
             'out_act':['linear'],
-            'weights_init':['xavier_uniform'],
-            'lr':[0.001, 0.003],
+            'weights_init':['xavier_uniform','he_normal','he_uniform'],
+            'lr':[0.001, 0.005],
             'momentum':[0.9],
             'reg_type': ['l2'],
-            'lr_decay':[True],
+            'lr_decay':[False],
             'nesterov':[False]
             }
 
 gs = GridSearchCVNN(params_config)
 gs.fit(X_train,y_train,loss='mee',epochs=150,shuffle=True)
-print(*gs.grid_results, sep='\n')
-
-
-
-
-
-
-
-
-
-
-
+print(sorted(gs.grid_results, key = lambda i: (i['mean_error_valid'], i['st_dev_valid'],i['time'])))
 

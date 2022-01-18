@@ -1,10 +1,12 @@
 import os, sys
+from turtle import back, delay
 import numpy as np
 from tqdm import tqdm
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from copy import deepcopy
 from itertools import product
 from timeit import default_timer as timer
+from joblib import Parallel, delayed, parallel_backend
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -118,7 +120,65 @@ class GridSearchCVNN:
                                         })
 
 
+
+class GridSearchCVNNParallel:
+    def __init__(self, params_grid:dict):
+        self.param_grid = params_grid
+        self.configurations = list(product(*params_grid.values()))
+        self.grid_results = list()
+
+
+    def fit(self, X, y, loss='mse', scoring=None, k_folds=4, epochs=100, shuffle=False, n_jobs=1):
+
+        self.X = X
+        self.y = y
+        self.loss = loss
+        self.scoring = scoring
+        self.k_folds = k_folds
+        self.epochs = epochs
+        self.shuffle = shuffle
+
+        print("Fitting {} folds for each of {} parameters configurations".format(k_folds, len(self.configurations)))
+        
+        with parallel_backend('multiprocessing'):
             
+            Parallel(n_jobs=n_jobs)( delayed(self.train_config)(i,config) for i,config in enumerate(self.configurations) )
+            sys.stdout.flush()
+
+        
+        
+
+
+    def train_config(self, i, config):
+
+        start = timer()    
+        config = {key:value for key,value in zip(self.param_grid.keys(), config)}
+        
+        print("Configuration {}:\t{}".format(i+1, config))
+
+        model = build_model(config)
+        model.compile('sgd', 
+                        loss=self.loss, 
+                        metric=self.scoring, 
+                        lr=config['lr'],
+                        momentum=config['momentum'],
+                        reg_type=config['reg_type'],
+                        lr_decay=config['lr_decay'],
+                        nesterov=config['nesterov'],
+                        lambd=config['lambda'])
+
+        cv = KFoldCV(model, X=self.X, y=self.y, k_folds=self.k_folds, epochs=self.epochs, batch_size=config['batch_size'], shuffle=self.shuffle)
+
+        end = timer()
+        time_it = end-start
+
+        self.grid_results.append({  'parameters':config,
+                                    'mean_error_train':cv.mean_train_loss,
+                                    'mean_error_valid':cv.mean_valid_loss,
+                                    'st_dev_train':cv.st_dev_train,
+                                    'st_dev_valid':cv.st_dev_valid,
+                                    'time':time_it,
+                                    })
 
 class HiddenPrints:
     def __enter__(self):

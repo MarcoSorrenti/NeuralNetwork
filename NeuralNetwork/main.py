@@ -64,7 +64,7 @@ if __name__ == '__main__':
         best_config = {
                     'n_features': n_features,
                     'n_hidden_layers':3,
-                    'n_units':30,
+                    'n_units':20,
                     'batch_size':128,
                     'out_units':2,
                     'hidden_act':'relu',
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                     'lr':0.001,
                     'momentum':0.9,
                     'reg_type': 'l2',
-                    'lambda':0.0001,
+                    'lambda':0.0005,
                     'lr_decay':True,
                     'nesterov':False
                 }
@@ -90,8 +90,8 @@ if __name__ == '__main__':
                     nesterov=best_config['nesterov'],
                     lambd=best_config['lambda'])
 
-    #es = EarlyStopping(100,1e-50)
-    model.fit(epochs=200,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo)
+    es = EarlyStopping(monitor='valid_loss',patience=20,min_delta=1e-23)
+    model.fit(epochs=100,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo,es=es)
 
     plt.figure(figsize=(15,7))
     plt.plot(model.history['train_loss'], label='train_loss')

@@ -21,11 +21,13 @@ class SGD:
 
     def optimize(self, epochs, batch_size, X_train, y_train, X_valid=None, y_valid=None, es=False):
 
-        self.train_loss = []
-        self.valid_loss = []
+        self.history = {
+            'train_loss':list(),
+            'valid_loss':list()
+        }
         if self.eval_metric:
-            self.train_accuracy = []
-            self.valid_accuracy = []
+            self.history.update({'train_{}'.format(self.eval_metric_text):list(),
+                                    'valid_{}'.format(self.eval_metric_text):list()})
 
         for epoch in range(epochs):
 
@@ -87,12 +89,12 @@ class SGD:
 
             #epoch evaluation
             mean_loss = sum(epoch_loss) / len(epoch_loss)
-            self.train_loss.append(mean_loss)
+            self.history['train_loss'].append(mean_loss)
             print("TRAINING || Loss ---> {}".format(mean_loss), end="    ")
 
             if self.eval_metric :
                 mean_accuracy = sum(epoch_accuracy) / len(epoch_accuracy)
-                self.train_accuracy.append(mean_accuracy)
+                self.history['train_{}'.format(self.eval_metric_text)].append(mean_accuracy)
                 print("{} ---> {}".format(self.eval_metric_text.title(), mean_accuracy))
                 
             
@@ -102,47 +104,42 @@ class SGD:
                 #validation step
                 y_pred_valid = self.model.predict(X_valid)
                 loss_valid = self.loss(y_valid, y_pred_valid)
-                self.valid_loss.append(loss_valid)
+                self.history['valid_loss'].append(loss_valid)
+                
                 print("VALIDATION || Loss ---> {}".format(loss_valid),end="    ")
 
                 if self.eval_metric : 
                     eval_metric_valid = self.eval_metric(y_valid, y_pred_valid)
-                    self.valid_accuracy.append(eval_metric_valid)
+                    self.history['valid_{}'.format(self.eval_metric_text)].append(eval_metric_valid)
                     print("{} ---> {}".format(self.eval_metric_text.title(), eval_metric_valid))
 
                 #EARLY STOPPING
                 if es and epoch > es.patience:
-                    if not es.check_stopping(self, loss_valid):
-                        self.model.history = {"train_loss":self.train_loss,"valid_loss":self.valid_loss}
+                    if not es.check_stopping(self):
 
-                        if self.eval_metric:
-                            self.model.history.update({ "train_{}".format(self.eval_metric_text):self.train_accuracy,
-                                                    "valid_{}".format(self.eval_metric_text):self.valid_accuracy})
+                        self.model.history = self.history
 
                         print("ES: Training terminated.")
                         return
 
-                
             print("\n")
             
 
-        self.model.history = {"train_loss":self.train_loss,"valid_loss":self.valid_loss}
-
-        if self.eval_metric:
-            self.model.history.update({ "train_{}".format(self.eval_metric_text):self.train_accuracy,"valid_accuracy{}".format(self.eval_metric_text):self.valid_accuracy})
-
+        self.model.history = self.history
 
 
 
 class EarlyStopping:
-    def __init__(self, patience, min_delta):
+    def __init__(self, monitor='valid_loss',patience=10, min_delta=1e-23):
+        self.monitor = monitor
         self.patience = patience
         self.tol = patience
         self.min_delta = min_delta
 
-    def check_stopping(self, opt, t_monitor):
 
-        gain = opt.valid_loss[-1] - t_monitor
+    def check_stopping(self, opt):
+
+        gain = opt.history[self.monitor][-1] - opt.history[self.monitor][-2]
         if gain < self.min_delta and self.tol > 0:
             self.tol -= 1
             print("ES: No improvement")

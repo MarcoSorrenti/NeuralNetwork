@@ -33,9 +33,18 @@ class SGD:
             epoch_loss = []
             epoch_accuracy = []
 
+            if batch_size < len(X_train):
+
+                perm = np.random.permutation(len(X_train))
+                X_train, y_train = X_train[perm], y_train[perm]
+
+
+
             for it, n in enumerate(range(0,len(X_train),batch_size)):
                 in_batch = X_train[n:n+batch_size]
                 out_batch = y_train[n:n+batch_size]
+
+
 
                 #nesterov momentum
                 if self.nesterov:

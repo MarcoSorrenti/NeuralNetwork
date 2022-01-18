@@ -7,35 +7,40 @@ from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN, GridSearchCVNNParallel
 
+
+
+#X_train, X_test, y_train, y_test = load_monk(1)
+X_train, X_test_blind, y_train, y_test_blind = load_cup()
+
+X_train, X_test, y_train, y_test = train_test_split(X_train, y_train)
+
+X_train_lvo, X_valid_lvo, y_train_lvo, y_valid_lvo = train_test_split(X_train, y_train)
+
+n_features = X_train.shape[1]
+batch = len(X_train)
+
+run_grid = False
+grid_search_config = False
+
 if __name__ == '__main__':
-
-    #X_train, X_test, y_train, y_test = load_monk(1)
-    X_train, X_test_blind, y_train, y_test_blind = load_cup()
-
-    X_train, X_test, y_train, y_test = train_test_split(X_train, y_train)
-
-    n_features = X_train.shape[1]
-    batch = len(X_train)
-
-    run_grid = False
 
     if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
 
         params_config = {
                     'n_features': [n_features],
-                    'n_hidden_layers':[3,5,8],
-                    'n_units':[20,30,50],
-                    'batch_size':[128,256],
+                    'n_hidden_layers':[3,5],
+                    'n_units':[20,50],
+                    'batch_size':[128],
                     'out_units':[2],
                     'hidden_act':['relu'],
                     'out_act':['linear'],
-                    'weights_init':['xavier_uniform','he_normal','he_uniform'],
-                    'lr':[0.001, 0.003, 0.005],
+                    'weights_init':['xavier_uniform','he_normal'],
+                    'lr':[0.001, 0.003],
                     'momentum':[0.9],
                     'reg_type': ['l2'],
                     'lambda':[0.001, 0.0001],
-                    'lr_decay':[False],
-                    'nesterov':[False, True]
+                    'lr_decay':[True],
+                    'nesterov':[False]
                     }
 
         gs = GridSearchCVNN(params_config)
@@ -52,30 +57,29 @@ if __name__ == '__main__':
     with open('NeuralNetwork/best_config.pickle', 'rb') as handle:
         best_config = pickle.load(handle)
 
-
-    grid_search_config = False
-
+    #chosing grid search best configuration or a custom 
     if grid_search_config:
         best_config = best_config
     else:
         best_config = {
                     'n_features': n_features,
                     'n_hidden_layers':3,
-                    'n_units':10,
-                    'batch_size':256,
+                    'n_units':30,
+                    'batch_size':128,
                     'out_units':2,
                     'hidden_act':'relu',
                     'out_act':'linear',
-                    'weights_init':'xavier_uniform',
+                    'weights_init':'he_normal',
                     'lr':0.001,
                     'momentum':0.9,
                     'reg_type': 'l2',
                     'lambda':0.0001,
-                    'lr_decay':False,
-                    'nesterov':True
+                    'lr_decay':True,
+                    'nesterov':False
                 }
 
 
+    #final model training and assessment
     model = build_model(best_config)
     model.compile('sgd',
                     loss='mee',
@@ -86,13 +90,12 @@ if __name__ == '__main__':
                     nesterov=best_config['nesterov'],
                     lambd=best_config['lambda'])
 
-    es = EarlyStopping(20,1e-23)
-    model.fit(epochs=200,batch_size=best_config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test,es=es)
+    #es = EarlyStopping(100,1e-50)
+    model.fit(epochs=200,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo)
 
     plt.figure(figsize=(15,7))
     plt.plot(model.history['train_loss'], label='train_loss')
     plt.plot(model.history['valid_loss'], color='r', label='valid_loss')
     plt.legend()
     plt.show()
-    plt.savefig('NeuralNetwork/plots/plot.png')
 

@@ -69,8 +69,8 @@ class KFoldCV:
 
     
     def shuffle(self):
-        self.X = np.random.permutation(self.X)
-        self.y = np.random.permutation(self.y)
+        perm = np.random.permutation(len(self.X))
+        self.X, self.y = self.X[perm], self.y[perm]
 
 
 
@@ -140,14 +140,6 @@ class GridSearchCVNNParallel:
 
         print("Fitting {} folds for each of {} parameters configurations".format(k_folds, len(self.configurations)))
         
-        with parallel_backend('multiprocessing'):
-            
-            Parallel(n_jobs=n_jobs)( delayed(self.train_config)(i,config) for i,config in enumerate(self.configurations) )
-            sys.stdout.flush()
-
-        
-        
-
 
     def train_config(self, i, config):
 

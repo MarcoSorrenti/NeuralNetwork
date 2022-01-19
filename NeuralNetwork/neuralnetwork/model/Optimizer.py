@@ -18,7 +18,6 @@ class SGD:
         self.regularization = regularization_dict[reg_type](lambd) if reg_type is not None else None
         self.lr_decay = Linear_decay(self.lr) if lr_decay else False
 
-
     def optimize(self, epochs, batch_size, X_train, y_train, X_valid=None, y_valid=None, es=False):
 
         self.history = {
@@ -122,11 +121,9 @@ class SGD:
 
                         self.model.history = self.history
 
-                        print("ES: Training terminated.")
                         return
 
-            print("\n")
-            
+            print("\r") 
 
         self.model.history = self.history
 
@@ -145,11 +142,12 @@ class EarlyStopping:
         gain = np.min(opt.history[self.monitor][:-1]) - opt.history[self.monitor][-1] 
         if gain < self.min_delta and self.tol > 0:
             self.tol -= 1
-            print("ES: No improvement")
+            print("\nES: No improvement",end='\r')
         else:
             self.tol = self.patience
             
         if self.tol == 0:
+            print("\nES: TRAINING TERMINATED.")
             return 0
 
         return 1

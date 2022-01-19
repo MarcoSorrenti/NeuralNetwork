@@ -6,7 +6,7 @@ from neuralnetwork.datasets.util import load_monk, load_cup, train_test_split
 from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN, GridSearchCVNNParallel
-
+from timeit import default_timer as timer
 
 
 #X_train, X_test, y_train, y_test = load_monk(1)
@@ -19,7 +19,7 @@ X_train_lvo, X_valid_lvo, y_train_lvo, y_valid_lvo = train_test_split(X_train, y
 n_features = X_train.shape[1]
 batch = len(X_train)
 
-run_grid = True
+run_grid = False
 grid_search_config = True
 
 if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
@@ -81,8 +81,9 @@ else:
                 'nesterov':False
                 }
 
-
 #final model training and assessment
+start = timer()
+
 model = build_model(best_config)
 model.compile('sgd',
                 loss='mee',
@@ -96,6 +97,11 @@ model.compile('sgd',
 
 es = EarlyStopping(monitor='valid_loss',patience=200,min_delta=1e-23)
 model.fit(epochs=3000,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo,es=es)
+
+end = timer()
+time_it = end-start
+print("\nTime elapsed:\t{}".format(time_it), end='\r')
+print("Best config:\t",best_config)
 
 plt.figure(figsize=(15,7))
 plt.plot(model.history['train_loss'], label='train_loss')

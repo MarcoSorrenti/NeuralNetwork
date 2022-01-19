@@ -108,7 +108,7 @@ def build_model(layers_params:dict):
     model = NeuralNetwork()
 
     #input layer
-    input_layer = Layer(layers_params['n_features'], 
+    input_layer = Layer(layers_params['n_features'],
                         layers_params['n_units'], 
                         activation_function=layers_params['hidden_act'], 
                         weights_init=layers_params['weights_init'])

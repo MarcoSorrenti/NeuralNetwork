@@ -32,7 +32,7 @@ class Tanh(Activation):
     def evaluate(self, x):
         return np.tanh(self.a * x / 2)
 
-    def derivative(self, x):  
+    def derivative(self, x):
         return 1 - np.tanh((self.a *x ) / 2)**2
 
 

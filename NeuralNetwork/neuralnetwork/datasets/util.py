@@ -55,7 +55,7 @@ def load_cup():
     return X_train, X_test, y_train, y_test
 
 
-def train_test_split(X, y, test_size=0.2):
+def train_test_split(X, y, test_size=0.15):
     index_split = int(np.floor(len(X)*(1-test_size)))
     X_train, X_test = X[:index_split],X[index_split:]
     y_train, y_test = y[:index_split],y[index_split:]

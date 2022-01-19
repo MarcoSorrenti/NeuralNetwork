@@ -25,6 +25,7 @@ class SGD:
             'train_loss':list(),
             'valid_loss':list()
         }
+
         if self.eval_metric:
             self.history.update({'train_{}'.format(self.eval_metric_text):list(),
                                     'valid_{}'.format(self.eval_metric_text):list()})
@@ -48,7 +49,7 @@ class SGD:
 
 
 
-                #nesterov momentum
+                #nesterov momentum --> velocity
                 if self.nesterov:
                     for layer in self.model.layers:
                         layer.w = np.add(layer.w, self.momentum*layer.old_w_gradient)
@@ -60,17 +61,19 @@ class SGD:
                 #OPTIMIZATION
                 for layer in self.model.layers:
 
-                    layer.w_gradient /= batch_size
-                    layer.b_gradient /= batch_size
-                    delta_w = layer.w_gradient * self.lr
-                    delta_b = layer.b_gradient * self.lr
+                    delta_w = layer.w_gradient * self.lr / batch_size
+                    delta_b = layer.b_gradient * self.lr / batch_size
+
+                    #regular momentum step
                     layer.w_gradient = np.add(delta_w, layer.old_w_gradient*self.momentum)
                     layer.b_gradient = np.add(delta_b, layer.old_b_gradient*self.momentum)
+
                     if self.regularization is not None:
                         layer.w = np.add(layer.w, layer.w_gradient - self.regularization.derivate(layer.w))
                     else:
                         layer.w = np.add(layer.w, layer.w_gradient)
                     layer.b = np.add(layer.b, layer.b_gradient)
+
 
                 #batch evaluation
                 if batch_size < X_train.shape[0]:
@@ -139,7 +142,7 @@ class EarlyStopping:
 
     def check_stopping(self, opt):
 
-        gain = opt.history[self.monitor][-1] - opt.history[self.monitor][-2]
+        gain = np.min(opt.history[self.monitor][:-1]) - opt.history[self.monitor][-1] 
         if gain < self.min_delta and self.tol > 0:
             self.tol -= 1
             print("ES: No improvement")

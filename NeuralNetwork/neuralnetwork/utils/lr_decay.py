@@ -1,5 +1,5 @@
 class Linear_decay:
-    def __init__(self, lr, tau=200):
+    def __init__(self, lr, tau=500):
         self.eta_0 = lr
         self.tau = tau
         self.eta_t = lr * 0.01

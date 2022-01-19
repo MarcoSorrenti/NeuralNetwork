@@ -18,7 +18,7 @@ class L2():
         return self.lambd * np.sum((w)**2) #to be checked
 
     def derivate(self, w_old):
-        return 2 * self.lambd * w_old
+        return self.lambd * w_old
 
 regularization_dict = {
     "l1": L1,

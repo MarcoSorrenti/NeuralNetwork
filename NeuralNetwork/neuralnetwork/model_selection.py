@@ -1,7 +1,6 @@
 import os, sys
 from turtle import back, delay
 import numpy as np
-from tqdm import tqdm
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from copy import deepcopy
 from itertools import product
@@ -12,7 +11,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class KFoldCV:
-    def __init__(self, model:NeuralNetwork, X, y, k_folds=5, epochs=400, batch_size=128, shuffle=False):
+    def __init__(self, model:NeuralNetwork, X, y, k_folds=4, epochs=400, batch_size=128, shuffle=False):
         self.X = X
         self.y = y
 
@@ -139,11 +138,16 @@ class GridSearchCVNNParallel:
         self.shuffle = shuffle
 
         print("Fitting {} folds for each of {} parameters configurations".format(k_folds, len(self.configurations)))
+
+        results = Parallel(n_jobs=n_jobs)( delayed(self.train_config)(i) for i in range(len(self.configurations)) )
+
+        self.grid_results = results
         
 
-    def train_config(self, i, config):
+    def train_config(self, i):
 
         start = timer()    
+        config = self.configurations[i]
         config = {key:value for key,value in zip(self.param_grid.keys(), config)}
         
         print("Configuration {}:\t{}".format(i+1, config))
@@ -164,13 +168,16 @@ class GridSearchCVNNParallel:
         end = timer()
         time_it = end-start
 
-        self.grid_results.append({  'parameters':config,
-                                    'mean_error_train':cv.mean_train_loss,
-                                    'mean_error_valid':cv.mean_valid_loss,
-                                    'st_dev_train':cv.st_dev_train,
-                                    'st_dev_valid':cv.st_dev_valid,
-                                    'time':time_it,
-                                    })
+        result = {  
+                'parameters':config,
+                'mean_error_train':cv.mean_train_loss,
+                'mean_error_valid':cv.mean_valid_loss,
+                'st_dev_train':cv.st_dev_train,
+                'st_dev_valid':cv.st_dev_valid,
+                'time':time_it,
+                }
+        
+        return result
 
 class HiddenPrints:
     def __enter__(self):

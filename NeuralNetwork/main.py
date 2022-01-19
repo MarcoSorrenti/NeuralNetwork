@@ -105,7 +105,8 @@ print("Best config:\t",best_config)
 
 plt.figure(figsize=(15,7))
 plt.plot(model.history['train_loss'], label='train_loss')
-plt.plot(model.history['valid_loss'], color='r', label='valid_loss')
+plt.plot(model.history['valid_loss'], color='tab:orange', linestyle='dashed',label='valid_loss')
 plt.legend()
+plt.grid()
 plt.show()
 

@@ -7,7 +7,6 @@ from neuralnetwork.model.Layer import Layer
 from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
 from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN, GridSearchCVNNParallel
 import os
-print("Current working directory: {0}".format(os.getcwd()))
 
 X_train, X_test_blind, y_train, y_test_blind = load_cup()
 

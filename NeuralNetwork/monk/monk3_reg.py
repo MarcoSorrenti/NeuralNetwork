@@ -1,8 +1,10 @@
 import os
 import sys
 import numpy as np
+
 sys.path.insert(0, os.path.abspath('neuralnetwork'))
 
+from neuralnetwork.model.Optimizer import EarlyStopping
 import matplotlib.pyplot as plt
 from neuralnetwork.datasets.util import load_monk
 from neuralnetwork.model.NeuralNetwork import build_model
@@ -21,11 +23,11 @@ config = {
         'out_units':1,
         'hidden_act':'sigmoid',
         'out_act':'sigmoid',
-        'weights_init':'xavier_uniform',
-        'lr':0.9,
+        'weights_init':'xavier_normal',
+        'lr':0.8,
         'momentum':0.6,
         'reg_type':'l2',
-        'lambda':0.004,
+        'lambda':0.0001,
         'lr_decay':False,
         'nesterov':False
         }

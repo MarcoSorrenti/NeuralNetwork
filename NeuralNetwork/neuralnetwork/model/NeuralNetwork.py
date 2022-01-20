@@ -1,6 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt 
 from copy import deepcopy
-from neuralnetwork.utils.metrics import accuracy_bin, mse_loss
 from neuralnetwork.model.Optimizer import optimizers
 from neuralnetwork.model.Layer import Layer
 
@@ -90,10 +90,39 @@ class NeuralNetwork():
         return deepcopy(self)
 
 
+    def plot_metrics(self, save_path=None):
+
+        plt.rcParams.update({'font.size':15})
+
+        if self.optimizer.eval_metric != None:
+
+            eval_metric = self.optimizer.eval_metric_text
+
+            fig, (ax1, ax2) = plt.subplots(1,2, figsize=(20,7))
+            ax1.plot(self.history['train_loss'], label='Training')
+            ax1.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label='Test')
+            ax2.plot(self.history['train_{}'.format(eval_metric)], label='Training')
+            ax2.plot(self.history['valid_{}'.format(eval_metric)], color='tab:orange', linestyle='dashed',label='Test')
+            ax1.legend(fontsize=20)
+            ax2.legend(fontsize=20)
+            ax1.grid()
+            ax2.grid()
+            plt.show()
+            
+        else:
+
+            plt.plot(self.history['train_loss'], label='Training')
+            plt.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label='Test')
+            plt.legend(fontsize=20)
+            plt.grid()
+            plt.show()
+
+        if save_path:
+            plt.savefig(save_path)
 
 
 
-#model building
+#model building function
 
 def build_model(layers_params:dict):
     '''Neural Network builder class

@@ -1,11 +1,9 @@
-import os, pickle, pathlib
-import numpy as np
+import os, pickle
 import matplotlib.pyplot as plt
 from neuralnetwork.model.Optimizer import EarlyStopping
-from neuralnetwork.datasets.util import load_monk, load_cup, train_test_split
-from neuralnetwork.model.Layer import Layer
-from neuralnetwork.model.NeuralNetwork import NeuralNetwork, build_model
-from neuralnetwork.model_selection import KFoldCV, GridSearchCVNN, GridSearchCVNNParallel
+from neuralnetwork.datasets.util import load_cup, train_test_split
+from neuralnetwork.model.NeuralNetwork import build_model
+from neuralnetwork.model_selection import GridSearchCVNNParallel
 import os
 
 X_train, X_test_blind, y_train, y_test_blind = load_cup()

@@ -1,12 +1,11 @@
 import os
 import sys
-import numpy as np
+
 sys.path.insert(0, os.path.abspath('neuralnetwork'))
 
-import matplotlib.pyplot as plt
+import numpy as np
 from neuralnetwork.datasets.util import load_monk
 from neuralnetwork.model.NeuralNetwork import build_model
-from timeit import default_timer as timer
 
 X_train, X_test, y_train, y_test = load_monk(3)
 
@@ -37,8 +36,6 @@ results = {
         'valid_accuracy': []
         }
 
-plt.rcParams.update({'font.size':15})
-
 for i in range(10):
         print("Iteration ---> ", i)
         
@@ -56,21 +53,13 @@ for i in range(10):
                         )
 
         model.fit(epochs=500,batch_size=config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test)
+
         results['train_loss'].append(model.history['train_loss'][-1]) 
         results['valid_loss'].append(model.history['valid_loss'][-1]) 
         results['train_accuracy'].append(model.history['train_accuracy'][-1]) 
         results['valid_accuracy'].append(model.history['valid_accuracy'][-1]) 
 
-        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(20,7))
-        ax1.plot(model.history['train_loss'], label='Training')
-        ax1.plot(model.history['valid_loss'], color='tab:orange', linestyle='dashed',label='Test')
-        ax2.plot(model.history['train_accuracy'], label='Training')
-        ax2.plot(model.history['valid_accuracy'], color='tab:orange', linestyle='dashed',label='Test')
-        ax1.legend(fontsize=20)
-        ax2.legend(fontsize=20)
-        ax1.grid()
-        ax2.grid()
-        plt.savefig("NeuralNetwork/monk/plot/monk3_test_{}.png".format(i+1))
+        model.plot_metrics(save_path="NeuralNetwork/monk/plot/monk3_test_{}.png".format(i+1))
 
 
 print("Train mse media: ", np.mean(results['train_loss']))

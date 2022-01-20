@@ -4,14 +4,11 @@ import numpy as np
 sys.path.insert(0, os.path.abspath('neuralnetwork'))
 
 import matplotlib.pyplot as plt
-from neuralnetwork.model.Optimizer import EarlyStopping
 from neuralnetwork.datasets.util import load_monk
 from neuralnetwork.model.NeuralNetwork import build_model
 from timeit import default_timer as timer
 
-
-
-X_train, X_test, y_train, y_test = load_monk(1)
+X_train, X_test, y_train, y_test = load_monk(3)
 
 n_features = X_train.shape[1]
 batch = len(X_train)
@@ -22,13 +19,13 @@ config = {
         'n_units':4,
         'batch_size':batch,
         'out_units':1,
-        'hidden_act':'tanh',
+        'hidden_act':'sigmoid',
         'out_act':'sigmoid',
-        'weights_init':'xavier_normal',
-        'lr':0.8,
-        'momentum':0.9,
-        'reg_type':None,
-        'lambda':0,
+        'weights_init':'xavier_uniform',
+        'lr':0.9,
+        'momentum':0.6,
+        'reg_type':'l2',
+        'lambda':0.004,
         'lr_decay':False,
         'nesterov':False
         }
@@ -58,8 +55,7 @@ for i in range(10):
                         lambd=config['lambda']
                         )
 
-        #es = EarlyStopping(monitor='valid_loss',patience=10,min_delta=1e-23)
-        model.fit(epochs=400,batch_size=config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test)
+        model.fit(epochs=500,batch_size=config['batch_size'],X_train=X_train,y_train=y_train,X_valid=X_test,y_valid=y_test)
         results['train_loss'].append(model.history['train_loss'][-1]) 
         results['valid_loss'].append(model.history['valid_loss'][-1]) 
         results['train_accuracy'].append(model.history['train_accuracy'][-1]) 
@@ -74,7 +70,7 @@ for i in range(10):
         ax2.legend(fontsize=20)
         ax1.grid()
         ax2.grid()
-        plt.savefig("NeuralNetwork/monk/plot/monk1_test_{}.png".format(i+1))
+        plt.savefig("NeuralNetwork/monk/plot/monk3_r_test_{}.png".format(i+1))
 
 
 print("Train mse media: ", np.mean(results['train_loss']))

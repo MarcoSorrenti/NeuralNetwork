@@ -103,4 +103,6 @@ model.fit(epochs=1000,batch_size=best_config['batch_size'],X_train=X_train_lvo,y
 print(best_config)
 
 model.plot_metrics()
+#for count, config in enumerate(gs_best_configs):
+#    print("Configurazione {} ----> {}\nResult: mean_error_train: {}\tmean_error_valid: {}\tst_dev_train: {}\tst_dev_valid: {}\ttime: {}\n".format(count+1,config['parameters'], config['mean_error_train'], config['mean_error_valid'], config['st_dev_train'], config['st_dev_valid'], config['time']))
 

@@ -19,7 +19,7 @@ class NeuralNetwork():
         self.layers.append(layer)
     
 
-    def feedForward(self, input):
+    def feedForward(self, output):
         '''Feed-forward propagation function. 
         Propagates the input through layers, also computing the penalty term if regularization is needed
         Args:

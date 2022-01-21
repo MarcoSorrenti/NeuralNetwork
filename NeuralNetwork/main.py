@@ -15,8 +15,8 @@ X_train_lvo, X_valid_lvo, y_train_lvo, y_valid_lvo = train_test_split(X_train, y
 n_features = X_train.shape[1]
 batch = len(X_train)
 
-run_grid = False
-grid_search_config = False
+run_grid = True
+grid_search_config = True
 
 if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
 
@@ -26,17 +26,17 @@ if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
                 'n_features': [n_features],
                 'n_hidden_layers':[2],
                 'n_units':[100],
-                'batch_size':[int(batch/3),int(batch/2)],
+                'batch_size':[int(batch/2)],
                 'out_units':[2],
-                'hidden_act':['tanh','sigmoid'],
-                'out_act':['linear'],
-                'weights_init':['he_uniform','he_normal'],
+                'hidden_act':['tanh'],
+                'out_act':['linear','sigmoid'],
+                'weights_init':['he_normal'],
                 'lr':[0.001, 0.01],
                 'momentum':[0.9],
                 'reg_type': ['l2'],
-                'lambda':[0.0003, 0.0001],
+                'lambda':[0.0003],
                 'lr_decay':[True,False],
-                'nesterov':[False],
+                'nesterov':[False,True],
                 'es':[es]
                 }
 
@@ -46,10 +46,10 @@ if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
         gs = GridSearchCVNNParallel(params_config)
         gs.fit(X_train,y_train,loss='mee',epochs=400,shuffle=True,n_jobs=8)
         gs_results = sorted(gs.grid_results, key = lambda i: (i['mean_error_valid'], i['st_dev_valid'],i['time']))
-        best_config = gs_results[0]['parameters']
+        best_configs = [config for config in gs_results[:10]]
 
     with open('NeuralNetwork/best_config.pickle', 'wb') as handle:
-        pickle.dump(best_config, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(best_configs, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 
@@ -57,12 +57,16 @@ if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
 if grid_search_config:
 
     with open('NeuralNetwork/best_config.pickle', 'rb') as handle:
-        gs_config = pickle.load(handle)
+        gs_best_configs = pickle.load(handle)
+        
+    print(gs_best_configs[:2])
 
-    best_config = gs_config
+    best_config = gs_best_configs[0]['parameters']
 
-    
 else:
+
+    es = EarlyStopping(monitor='valid_loss',patience=200,min_delta=1e-23)
+
     best_config = {
                 'n_features': n_features,
                 'n_hidden_layers':2,
@@ -77,7 +81,8 @@ else:
                 'reg_type':'l2',
                 'lambda':0.00001,
                 'lr_decay':False,
-                'nesterov':True
+                'nesterov':True,
+                'es':es
                 }
 
 
@@ -93,8 +98,8 @@ model.compile('sgd',
                 lambd=best_config['lambda']
                 )
 
-es = EarlyStopping(monitor='valid_loss',patience=200,min_delta=1e-23)
+
 model.fit(epochs=100,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo,es=es)
 
-model.plot_metrics('NeuralNetwork/nesterov.png')
+model.plot_metrics()
 

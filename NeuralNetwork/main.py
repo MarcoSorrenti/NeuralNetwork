@@ -16,9 +16,11 @@ n_features = X_train.shape[1]
 batch = len(X_train)
 
 run_grid = False
-grid_search_config = True
+grid_search_config = False
 
 if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
+
+    es = EarlyStopping(monitor='valid_loss',patience=200,min_delta=1e-23)
 
     params_config = {
                 'n_features': [n_features],
@@ -34,7 +36,8 @@ if not os.path.isfile('NeuralNetwork/best_config.pickle') or run_grid:
                 'reg_type': ['l2'],
                 'lambda':[0.0003, 0.0001],
                 'lr_decay':[True,False],
-                'nesterov':[False]
+                'nesterov':[False],
+                'es':[es]
                 }
 
     if __name__ == '__main__':
@@ -74,7 +77,7 @@ else:
                 'reg_type':'l2',
                 'lambda':0.00001,
                 'lr_decay':False,
-                'nesterov':False
+                'nesterov':True
                 }
 
 
@@ -91,7 +94,7 @@ model.compile('sgd',
                 )
 
 es = EarlyStopping(monitor='valid_loss',patience=200,min_delta=1e-23)
-model.fit(epochs=3000,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo,es=es)
+model.fit(epochs=100,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo,es=es)
 
-model.plot_metrics()
+model.plot_metrics('NeuralNetwork/nesterov.png')
 

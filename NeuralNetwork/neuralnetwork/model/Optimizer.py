@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 from neuralnetwork.utils.regularization import regularization_dict
 from neuralnetwork.utils.metrics import mse_loss, accuracy_bin
@@ -51,14 +52,20 @@ class SGD:
                 #nesterov momentum --> velocity
                 if self.nesterov:
                     for layer in self.model.layers:
+                        layer._nesterov_w = deepcopy(layer.w)
+                        layer._nesterov_b = deepcopy(layer.b)
                         layer.w = np.add(layer.w, self.momentum*layer.old_w_gradient)
                         layer.b = np.add(layer.b, self.momentum*layer.old_b_gradient)
 
+
                 #gradient computation
                 eval_metric, loss = self.model.backprop(in_batch, out_batch)
-                
+
                 #OPTIMIZATION
                 for layer in self.model.layers:
+                    if self.nesterov:
+                        layer.w = layer._nesterov_w
+                        layer.b = layer._nesterov_b
 
                     delta_w = layer.w_gradient * self.lr / batch_size
                     delta_b = layer.b_gradient * self.lr / batch_size
@@ -68,9 +75,11 @@ class SGD:
                     layer.b_gradient = np.add(delta_b, layer.old_b_gradient*self.momentum)
 
                     if self.regularization is not None:
+
                         layer.w = np.add(layer.w, layer.w_gradient - self.regularization.derivate(layer.w))
                     else:
                         layer.w = np.add(layer.w, layer.w_gradient)
+
                     layer.b = np.add(layer.b, layer.b_gradient)
 
 

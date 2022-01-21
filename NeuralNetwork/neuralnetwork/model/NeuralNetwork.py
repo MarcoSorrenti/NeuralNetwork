@@ -107,7 +107,6 @@ class NeuralNetwork():
             ax2.legend(fontsize=20)
             ax1.grid()
             ax2.grid()
-            plt.show()
             
         else:
 
@@ -115,7 +114,6 @@ class NeuralNetwork():
             plt.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label='Test')
             plt.legend(fontsize=20)
             plt.grid()
-            plt.show()
 
         if save_path:
             plt.savefig(save_path)

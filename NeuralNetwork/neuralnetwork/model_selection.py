@@ -11,7 +11,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class KFoldCV:
-    def __init__(self, model:NeuralNetwork, X, y, k_folds=4, epochs=400, batch_size=128, shuffle=False):
+    def __init__(self, model:NeuralNetwork, X, y, k_folds=4, epochs=400, batch_size=128, es=None,shuffle=False):
         self.X = X
         self.y = y
 
@@ -29,7 +29,7 @@ class KFoldCV:
 
             try:
                 with HiddenPrints():
-                    history = self.model.fit(epochs=epochs,batch_size=batch_size,X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid)
+                    history = self.model.fit(epochs=epochs,batch_size=batch_size,X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid,es=es)
 
                 train_loss = history['train_loss'][-1]
                 val_loss = history['valid_loss'][-1]
@@ -163,7 +163,7 @@ class GridSearchCVNNParallel:
                         nesterov=config['nesterov'],
                         lambd=config['lambda'])
 
-        cv = KFoldCV(model, X=self.X, y=self.y, k_folds=self.k_folds, epochs=self.epochs, batch_size=config['batch_size'], shuffle=self.shuffle)
+        cv = KFoldCV(model, X=self.X, y=self.y, k_folds=self.k_folds, epochs=self.epochs, batch_size=config['batch_size'], es=config['es'], shuffle=self.shuffle)
 
         end = timer()
         time_it = end-start

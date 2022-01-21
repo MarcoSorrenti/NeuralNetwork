@@ -5,6 +5,13 @@ import numpy as np
 
 
 def load_monk(problem):
+    '''Loading monk train and test data from remote URLS
+    Args: 
+        problem : monk problem requested
+    Returns:
+        X_train, X_test : feature matrices for train and test set
+        y_train, y_test : target matrices for train and test set
+    '''
     monk_train = pd.read_csv(
         "http://archive.ics.uci.edu/ml/machine-learning-databases/monks-problems/monks-{}.train".format(problem),
         header=None,
@@ -26,13 +33,18 @@ def load_monk(problem):
 
 
 def split_monk_data(dataset):
+    '''Splitting function for monk data
+    Args: 
+        dataset : original monk dataset
+    Returns:
+        X, y : Feature matrix and target column
+    '''
+    #removing useless columns
     dataset = dataset.iloc[:,:-1]
-    #monk_train = monk_train.sample(frac=1, random_state=42)
-
     X_to_encode = dataset.iloc[:,1:]
-    #one hot encoding
-    X = pd.get_dummies(X_to_encode, columns=[col for col in X_to_encode.columns]) # encoding
     y = dataset.iloc[:,0]
+    #one hot encoding
+    X = pd.get_dummies(X_to_encode, columns=[col for col in X_to_encode.columns])
     X = np.array(X)
     y = np.array(y).reshape(-1,1)
 
@@ -41,6 +53,10 @@ def split_monk_data(dataset):
 
 
 def load_cup():
+    '''Loading cup data from local folder
+    Returns:
+        X, y : Feature matrix and target column
+    '''
     cup_folder = "NeuralNetwork/neuralnetwork/datasets/"
     train_file = "ML-CUP21-TR.csv"
     test_file = "ML-CUP21-TS.csv"
@@ -56,6 +72,14 @@ def load_cup():
 
 
 def train_test_split(X, y, test_size=0.15):
+    '''Splitting function for dataset decomposition into train and test(validation) set
+    Args: 
+        X : feature matrix
+        y : target array or matrix
+        test_size : percentage of the original dataset assigned to the test set 
+    Returns:
+        X, y : Feature matrix and target column
+    '''
     index_split = int(np.floor(len(X)*(1-test_size)))
     X_train, X_test = X[:index_split],X[index_split:]
     y_train, y_test = y[:index_split],y[index_split:]

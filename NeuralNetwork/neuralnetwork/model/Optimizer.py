@@ -42,11 +42,9 @@ class SGD:
                 X_train, y_train = X_train[perm], y_train[perm]
 
 
-
             for it, n in enumerate(range(0,len(X_train),batch_size)):
                 in_batch = X_train[n:n+batch_size]
                 out_batch = y_train[n:n+batch_size]
-
 
 
                 #nesterov momentum --> velocity
@@ -139,11 +137,19 @@ class SGD:
 
 
 class EarlyStopping:
+    '''Class for Training interruption based on a monitoring metric to check on every epoch.
+    Parameters:
+        monitor : metric to monitor
+        patience : tolerance epochs
+    '''
     def __init__(self, monitor='valid_loss',patience=10, min_delta=1e-23):
         self.monitor = monitor
         self.patience = patience
         self.tol = patience
         self.min_delta = min_delta
+
+    def __repr__(self):
+        return "ES: {} patience, {} min_delta".format(self.monitor, self.patience, self.min_delta)
 
 
     def check_stopping(self, opt):
@@ -157,6 +163,7 @@ class EarlyStopping:
             
         if self.tol == 0:
             print("\nES: TRAINING TERMINATED.")
+            self.tol = self.patience
             return 0
 
         return 1

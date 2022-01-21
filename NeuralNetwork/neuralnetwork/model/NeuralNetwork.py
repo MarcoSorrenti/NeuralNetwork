@@ -5,15 +5,26 @@ from neuralnetwork.model.Optimizer import optimizers
 from neuralnetwork.model.Layer import Layer
 
 class NeuralNetwork():
+    '''Neural network model class.'''
     def __init__(self):
+        '''Constructor
+        layers: layers array structure initialization
+        history: dictionary initialization for training memorization of loss and evaluation metrics 
+        '''
         self.layers = []
         self.history = dict()
 
     def add_layer(self, layer):
+        '''Function for layer addition to the network structure'''
         self.layers.append(layer)
     
 
-    def feedForward(self, output):
+    def feedForward(self, input):
+        '''Feed-forward propagation function. 
+        Propagates the input through layers, also computing the penalty term if regularization is needed
+        Args:
+            output : actual input to propagate forward from the input layer  
+        '''
         penalty_term = 0
         for layer in self.layers:           
             output = layer.forward(output)
@@ -117,6 +128,8 @@ class NeuralNetwork():
 
         if save_path:
             plt.savefig(save_path)
+
+        plt.show()
 
 
 

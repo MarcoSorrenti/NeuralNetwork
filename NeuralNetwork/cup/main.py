@@ -57,12 +57,29 @@ for trial in range(trials):
     model.plot_metrics(show=False,save_path='NeuralNetwork/cup/plots/final_retraining_{}.png'.format(trial+1))
 
 
+
+
 losses = [model.history['valid_loss'][-1] for model in models]
 best_loss = np.argmin(losses)
 
-print("Losses: ", losses, "Best_index:"+ best_loss, "Best_loss: "+ losses[best_loss], "Time: "+ times[best_loss],sep='\n')
+print("Losses: {}".format(losses),
+        "Best_index: {}".format(best_loss),
+        "Best_loss: {}".format(losses[best_loss]),
+        "Time: {}".format(times[best_loss]),sep='\n')
 
 best_model = models[best_loss]
+
+write = False
+if not os.path.isfile("NeuralNetwork/cup/model.pickle") or write:
+    with open('NeuralNetwork/cup/model.pickle','wb') as handle:
+        pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+load = False
+if load and os.path.isfile("NeuralNetwork/cup/model.pickle"):    
+    with open('NeuralNetwork/cup/model.pickle','rb') as handle:
+        best_model = pickle.load(handle)
+
+
 results = best_model.evaluate(X_test,y_test,metrics=['mee'])
 print(results)
 

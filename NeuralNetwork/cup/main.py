@@ -83,7 +83,7 @@ print(results)
 
 
 # Predict on blind
-header = "Jacopo Gasparro   Marco Sorrenti   Roberto Cannarella\nTeam\nML-CUP21\n23/01/2022"
+header = "Jacopo Gasparro   Marco Sorrenti   Roberto Cannarella\nI Montanari\nML-CUP21\n23/01/2022"
 res = best_model.predict(X_test_blind)
 res = np.insert(res, 0, [int(i) for i in range(1, len(X_test_blind)+1)], axis=1)
 np.savetxt('NeuralNetwork/cup/results.csv', res, delimiter=',', fmt=['%d','%5.17f','%5.17f'], header=header)

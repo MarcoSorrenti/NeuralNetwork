@@ -6,8 +6,20 @@ from neuralnetwork.utils.lr_decay import Linear_decay
 from neuralnetwork.utils.metrics import evaluation_metrics
 
 class SGD:
+    '''Stochastic Gradient Descent class.'''
     def __init__(self, model, loss='mse', eval_metric=None, lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=None, lr_decay=False):
-
+        '''Constructor.
+        Args:
+            model: 
+            loss:
+            eval_metric: 
+            lr: learning rate 
+            momentum: momentum 
+            nesterov: 
+            reg_type: regularization 
+            lambd: lambda 
+            lr_decay: learning rate decay
+        '''
         self.model = model
         self.loss = evaluation_metrics[loss]
         self.loss_text = loss
@@ -20,7 +32,16 @@ class SGD:
         self.lr_decay = Linear_decay(self.lr) if lr_decay else False
 
     def optimize(self, epochs, batch_size, X_train, y_train, X_valid=None, y_valid=None, es=False):
-
+        '''Optimize function.
+        Args:
+            epochs: number of epochs 
+            batch_size:
+            X_train
+            y_train
+            X_valid
+            y_valid
+            es: early stopping object
+        '''
         self.history = {
             'train_loss':list(),
             'valid_loss':list()
@@ -80,7 +101,6 @@ class SGD:
 
                     layer.b = np.add(layer.b, layer.b_gradient)
 
-
                 #batch evaluation
                 if batch_size < X_train.shape[0]:
                     print("{} \\\\ Loss:\t{}".format(it + 1, loss), end="\n")
@@ -91,7 +111,6 @@ class SGD:
                 if self.eval_metric:
                     epoch_accuracy.append(eval_metric)
             
-
             #lr decay
             if self.lr_decay:
                 self.lr = self.lr_decay.decay(epoch)
@@ -105,9 +124,7 @@ class SGD:
                 mean_accuracy = sum(epoch_accuracy) / len(epoch_accuracy)
                 self.history['train_{}'.format(self.eval_metric_text)].append(mean_accuracy)
                 print("{} ---> {}".format(self.eval_metric_text.title(), mean_accuracy))
-                
-            
-            
+                       
             if X_valid is not None:
 
                 #validation step
@@ -129,12 +146,9 @@ class SGD:
                         self.model.history = self.history
 
                         return
-
             print("\r") 
-
+        
         self.model.history = self.history
-
-
 
 class EarlyStopping:
     '''Class for Training interruption based on a monitoring metric to check on every epoch.
@@ -153,7 +167,10 @@ class EarlyStopping:
 
 
     def check_stopping(self, opt):
-
+        '''Check stopping function. 
+        Args:
+            opt: optimizer
+        '''
         gain = np.min(opt.history[self.monitor][:-1]) - opt.history[self.monitor][-1] 
         if gain < self.min_delta and self.tol > 0:
             self.tol -= 1
@@ -165,8 +182,6 @@ class EarlyStopping:
             print("\nES: TRAINING TERMINATED.")
             self.tol = self.patience
             return 0
-
         return 1
-
 
 optimizers = {'sgd':SGD}

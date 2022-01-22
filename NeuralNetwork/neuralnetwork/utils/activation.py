@@ -2,12 +2,21 @@ import numpy as np
 
 class Activation:
     def evaluate(self, x):
+        '''Evaluate function. Compute the activation function on x.
+        Args:
+            x: output of a layer 
+        '''
         pass
 
     def derivative(self, x):
+        '''Derivative function. Compute the derivative function on x.
+        Args:
+            x: output of a layer 
+        '''
         pass
 
 class Linear(Activation):
+    '''Linear class. Provide the identity function and its derivative.'''
     def evaluate(self, x):
         return x
 
@@ -15,6 +24,7 @@ class Linear(Activation):
         return np.ones(x.shape)
 
 class Sigmoid(Activation):
+    '''Sigmoid class. Provide the logistic sigmoid function and its derivative.'''
     def __init__(self, a=1):
         self.a = a
     
@@ -26,6 +36,7 @@ class Sigmoid(Activation):
         return self.a * x * (1 - x) 
 
 class Tanh(Activation):
+    '''Tanh class. Provide the hyperbolic tan function and its derivative.'''
     def __init__(self, a=2):
         self.a = a
 
@@ -37,6 +48,7 @@ class Tanh(Activation):
 
 
 class Relu(Activation):
+    '''Relu class. Provide the rectified linear unit function and its derivative.'''
     def evaluate(self, x):
         return np.maximum(0, x)
 
@@ -44,6 +56,7 @@ class Relu(Activation):
         return (x > 0).astype(int) # if x > 0 return 1 else 0
 
 class LeakyRelu(Activation):
+    '''LeakyRelu class. Provide the Leaky Relu function and its derivative.'''
     def evaluate(self, x):
         return 
 
@@ -51,6 +64,7 @@ class LeakyRelu(Activation):
         return 
 
 class Softmax(Activation):
+    '''Softmax class. Provide the Softmax function and its derivative.'''
     def evaluate(self, x):
         return np.exp(x) / np.sum(np.exp(x), axis=1)
 
@@ -63,6 +77,7 @@ activation_function_dict = {
     "sigmoid": Sigmoid(),
     "tanh": Tanh(),
     "relu": Relu(),
+    "leaky_relu":LeakyRelu(),
     "softmax": Softmax()
     }
     

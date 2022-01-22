@@ -25,18 +25,18 @@ if not os.path.isfile('NeuralNetwork/best_config1.pickle') or run_grid:
     params_config = {
                 'n_features': [n_features],
                 'n_hidden_layers':[1, 2],
-                'n_units':[20, 40, 80, 100],
-                'batch_size':[128, int(batch/2)],
+                'n_units':[60, 80, 100],
+                'batch_size':[128, int(batch/3), int(batch/2)],
                 'out_units':[2],
                 'hidden_act':['tanh'],
                 'out_act':['linear'],
                 'weights_init':['he_uniform'],
-                'lr':[0.0001, 0.001, 0.01],
-                'momentum':[0.2, 0.5, 0.9],
+                'lr':[0.001, 0.005, 0.007, 0.009, 0.01],
+                'momentum':[0.5, 0.6, 0.7, 0.8, 0.9],
                 'reg_type': ['l2'],
-                'lambda':[0.0001, 0.001, 0.01],
-                'lr_decay':[True, False],
-                'nesterov':[True, False],
+                'lambda':[0.0001, 0.0003, 0.0005, 0.001],
+                'lr_decay':[False],
+                'nesterov':[False,True],
                 'es':[es]
                 }
 

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from neuralnetwork.model.Optimizer import optimizers
 from neuralnetwork.model.Layer import Layer
+from neuralnetwork.utils.metrics import evaluation_metrics
 
 class NeuralNetwork():
     '''Neural network model class.'''
@@ -75,6 +76,14 @@ class NeuralNetwork():
         output, _ = model.feedForward(x_test)
         return output
 
+    def evaluate(self, x_test, y_test, metrics=['mse']):
+        y_preds = self.predict(x_test)
+
+        scores = dict()
+        for metric in metrics:
+            scores[metric] = evaluation_metrics[metric](y_test,y_preds)
+        return scores
+
 
 
     def reset_model(self):
@@ -101,7 +110,7 @@ class NeuralNetwork():
         return deepcopy(self)
 
 
-    def plot_metrics(self, save_path=None):
+    def plot_metrics(self, show=False,save_path=None):
 
         plt.rcParams.update({'font.size':15})
 
@@ -129,7 +138,8 @@ class NeuralNetwork():
         if save_path:
             plt.savefig(save_path)
 
-        plt.show()
+        if show == True:
+            plt.show()
 
 
 

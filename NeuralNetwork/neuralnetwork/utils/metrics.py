@@ -18,7 +18,7 @@ def mee_loss(y_true, y_preds):
         Returns:
             mee: loss
     '''
-    return np.mean(np.sum(np.square(y_true - y_preds), axis=1))
+    return np.mean(np.sqrt(np.sum(np.square(y_true - y_preds), axis=1)))
 
 def accuracy_bin(y_true, y_preds):
     '''Accuracy bin function.

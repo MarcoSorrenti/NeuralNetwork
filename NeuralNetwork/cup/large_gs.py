@@ -25,7 +25,7 @@ if not os.path.isfile('NeuralNetwork/cup/best_config.pickle') or run_grid:
 
     params_config = {
                 'n_features': [n_features],
-                'n_hidden_layers':[1, 2],
+                'n_hidden_layers':[1, 2, 3],
                 'n_units':[20, 40, 80, 100],
                 'batch_size':[128, int(batch/2)],
                 'out_units':[2],
@@ -51,3 +51,10 @@ if not os.path.isfile('NeuralNetwork/cup/best_config.pickle') or run_grid:
     with open('NeuralNetwork/cup/best_config.pickle', 'wb') as handle:
         pickle.dump(best_configs, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+
+# Stampa delle best config (to be removed)
+with open('NeuralNetwork/cup/best_config.pickle', 'rb') as handle:
+    best_configs = pickle.load(handle)
+
+for count, config in enumerate(best_configs):
+    print("Configurazione {} ----> {}\nResults:\nmean_error_train: {}\nmean_error_valid: {}\nst_dev_train: {}\nst_dev_valid: {}\ntime: {}\n".format(count+1,config['parameters'], config['mean_error_train'], config['mean_error_valid'], config['st_dev_train'], config['st_dev_valid'], config['time']))

@@ -144,7 +144,7 @@ class NeuralNetwork():
         '''
         return deepcopy(self)
 
-    def plot_metrics(self, show=False,save_path=None):
+    def plot_metrics(self, test_label='Test', show=False,save_path=None):
         '''Plot metrics function.
         Args:
            show: boolean. Show plots if True.
@@ -155,16 +155,16 @@ class NeuralNetwork():
             eval_metric = self.optimizer.eval_metric_text
             fig, (ax1, ax2) = plt.subplots(1,2, figsize=(20,7))
             ax1.plot(self.history['train_loss'], label='Training')
-            ax1.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label='Test')
+            ax1.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label=test_label)
             ax2.plot(self.history['train_{}'.format(eval_metric)], label='Training')
-            ax2.plot(self.history['valid_{}'.format(eval_metric)], color='tab:orange', linestyle='dashed',label='Test')
+            ax2.plot(self.history['valid_{}'.format(eval_metric)], color='tab:orange', linestyle='dashed',label=test_label)
             ax1.legend(fontsize=20)
             ax2.legend(fontsize=20)
             ax1.grid()
             ax2.grid()        
         else:
             plt.plot(self.history['train_loss'], label='Training')
-            plt.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label='Test')
+            plt.plot(self.history['valid_loss'], color='tab:orange', linestyle='dashed',label=test_label)
             plt.legend(fontsize=20)
             plt.grid()
 
@@ -173,6 +173,8 @@ class NeuralNetwork():
 
         if show == True:
             plt.show()
+        
+        plt.clf()
 
 
 #model building function

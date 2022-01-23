@@ -26,7 +26,7 @@ with open('NeuralNetwork/cup/best_config1.pickle', 'rb') as handle:
 best_config = gs_best_configs[0]['parameters']
 
 #model retraining and assessment
-write = True
+write = False
 if not os.path.isfile("NeuralNetwork/cup/model.pickle") or write:
     models = list()
     times = list()
@@ -46,7 +46,6 @@ if not os.path.isfile("NeuralNetwork/cup/model.pickle") or write:
 
         start = timer()
 
-        es = EarlyStopping(monitor='valid_loss',patience=250,min_delta=1e-23)
         model.fit(epochs=1000,batch_size=best_config['batch_size'],X_train=X_train_lvo,y_train=y_train_lvo,X_valid=X_valid_lvo,y_valid=y_valid_lvo,es=best_config['es'])
 
         end = timer()
@@ -55,7 +54,7 @@ if not os.path.isfile("NeuralNetwork/cup/model.pickle") or write:
         models.append(model)
         times.append(time)
         
-        model.plot_metrics(show=False,save_path='NeuralNetwork/cup/plots/final_retraining_{}.png'.format(trial+1))
+        model.plot_metrics(test_label='Validation', show=False,save_path='NeuralNetwork/cup/plots/final_retraining_{}.png'.format(trial+1))
 
     valid_losses = [model.history['valid_loss'][-1] for model in models]
     train_losses = [model.history['train_loss'][-1] for model in models]
@@ -72,6 +71,8 @@ if not os.path.isfile("NeuralNetwork/cup/model.pickle") or write:
     with open('NeuralNetwork/cup/model.pickle','wb') as handle:
         pickle.dump(best_model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+
+
 load = True
 if load and os.path.isfile("NeuralNetwork/cup/model.pickle"):    
     with open('NeuralNetwork/cup/model.pickle','rb') as handle:
@@ -83,7 +84,7 @@ print(results)
 
 
 # Predict on blind
-header = "Jacopo Gasparro   Marco Sorrenti   Roberto Cannarella\nI Montanari\nML-CUP21\n23/01/2022"
+header = "Jacopo Gasparro   Marco Sorrenti   Roberto Cannarella\nIMontanari\nML-CUP21\n23/01/2022"
 res = best_model.predict(X_test_blind)
 res = np.insert(res, 0, [int(i) for i in range(1, len(X_test_blind)+1)], axis=1)
 np.savetxt('NeuralNetwork/cup/results.csv', res, delimiter=',', fmt=['%d','%5.17f','%5.17f'], header=header)

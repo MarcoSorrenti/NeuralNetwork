@@ -1,6 +1,7 @@
 import numpy as np
 
 class L1():
+    '''Lasso regression'''
     def __init__(self, lambd):
         self.lambd = lambd
 
@@ -11,6 +12,7 @@ class L1():
         return 2 * self.lambd * w_old
 
 class L2():
+    '''Ridge regression'''
     def __init__(self, lambd=0.001):
         self.lambd = lambd
 

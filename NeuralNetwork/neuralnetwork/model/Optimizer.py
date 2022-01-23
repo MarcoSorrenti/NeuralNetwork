@@ -10,15 +10,15 @@ class SGD:
     def __init__(self, model, loss='mse', eval_metric=None, lr=0.1, momentum=0.5, nesterov=False, reg_type=None, lambd=None, lr_decay=False):
         '''Constructor.
         Args:
-            model: 
-            loss:
-            eval_metric: 
+            model: neural network model to train
+            loss: loss metric for error computing
+            eval_metric: evaluation metric for classification task
             lr: learning rate 
             momentum: momentum 
-            nesterov: 
-            reg_type: regularization 
-            lambd: lambda 
-            lr_decay: learning rate decay
+            nesterov: boolean. Nesterov momentum 
+            reg_type: str. Regularization type 
+            lambd: lambda value for regularization computation
+            lr_decay: boolean. In True includes a Linear learning rate decay
         '''
         self.model = model
         self.loss = evaluation_metrics[loss]
@@ -35,11 +35,11 @@ class SGD:
         '''Optimize function.
         Args:
             epochs: number of epochs 
-            batch_size:
-            X_train
-            y_train
-            X_valid
-            y_valid
+            batch_size: int. batch size
+            X_train: training set features
+            y_train: training set target
+            X_valid: validation set features
+            y_valid: validation set target
             es: early stopping object
         '''
         self.history = {
@@ -51,6 +51,7 @@ class SGD:
             self.history.update({'train_{}'.format(self.eval_metric_text):list(),
                                     'valid_{}'.format(self.eval_metric_text):list()})
 
+        #training cycle
         for epoch in range(epochs):
 
             print("EPOCH {}:".format(epoch))
@@ -58,11 +59,11 @@ class SGD:
             epoch_accuracy = []
 
             if batch_size < len(X_train):
-
+                #batch shuffle
                 perm = np.random.permutation(len(X_train))
                 X_train, y_train = X_train[perm], y_train[perm]
 
-
+            #batch cycle
             for it, n in enumerate(range(0,len(X_train),batch_size)):
                 in_batch = X_train[n:n+batch_size]
                 out_batch = y_train[n:n+batch_size]
@@ -80,7 +81,7 @@ class SGD:
                 #gradient computation
                 eval_metric, loss = self.model.backprop(in_batch, out_batch)
 
-                #OPTIMIZATION
+                #gradient application
                 for layer in self.model.layers:
                     if self.nesterov:
                         layer.w = layer._nesterov_w

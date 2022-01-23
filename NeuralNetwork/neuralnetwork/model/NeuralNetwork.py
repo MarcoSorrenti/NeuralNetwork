@@ -147,8 +147,9 @@ class NeuralNetwork():
     def plot_metrics(self, test_label='Test', show=False,save_path=None):
         '''Plot metrics function.
         Args:
-           show: boolean. Show plots if True.
-           save_path: string. Save plots if given
+            test_label: label to assign to validation/test metric plot
+            show: boolean. Show plots if True.
+            save_path: string. Save plots if given
         '''
         plt.rcParams.update({'font.size':15})
         if self.optimizer.eval_metric != None:

@@ -1,7 +1,7 @@
 import numpy as np
 
 def RandomInit(fan_in, fan_out):
-    limit = 0.25            # could be a parameter?
+    limit = 0.25
     weights = np.random.uniform(-limit,limit,(fan_in,fan_out))
     return weights
 

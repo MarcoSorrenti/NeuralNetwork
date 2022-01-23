@@ -11,12 +11,23 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class KFoldCV:
+    '''KFold Cross-validation class.
+    Parameters:
+        model: neural network built and compiled model
+        X: training set features
+        y: training set target
+        epochs: training epochs
+        batch_size: int. batch size
+        es: early stopping object
+        shuffle: boolean.
+    '''
     def __init__(self, model:NeuralNetwork, X, y, k_folds=4, epochs=400, batch_size=128, es=None,shuffle=False):
         self.X = X
         self.y = y
 
         if shuffle: self.shuffle()
 
+        #splitting into k folds
         self.x_folds = np.array_split(X, k_folds)
         self.y_folds = np.array_split(y, k_folds)
 
@@ -24,9 +35,11 @@ class KFoldCV:
         self.cv_train_loss = list()
         self.model = model
 
+        #cross-validation
         for i in range(k_folds):
             X_train, y_train, X_valid, y_valid = self.get_folds(i)
 
+            #model fit for training
             try:
                 with HiddenPrints():
                     history = self.model.fit(epochs=epochs,batch_size=batch_size,X_train=X_train, y_train=y_train, X_valid=X_valid, y_valid=y_valid,es=es)
@@ -54,7 +67,15 @@ class KFoldCV:
         
 
     def get_folds(self, val_fold_id):
-        #implement stratification for classification
+        '''Function for folds merging useful to build the training and validation set for each kfold iteration
+        Args:
+            val_fold_id: iteration. fold to exploit as validation set
+        Returns:
+            X_train: training set features
+            y_train: training set target
+            X_valid: validation set features 
+            y_valid: validation set target
+        '''
 
         X_train = np.concatenate(np.delete(self.x_folds, val_fold_id, axis=0))
         y_train = np.concatenate(np.delete(self.y_folds, val_fold_id, axis=0))
@@ -75,6 +96,7 @@ class KFoldCV:
 
 
 class GridSearchCVNN:
+    '''Default Grid Search class for model selection (check GridSearchCVNNParallel)'''
     def __init__(self, params_grid:dict):
         self.param_grid = params_grid
         self.configurations = list(product(*params_grid.values()))
@@ -121,6 +143,10 @@ class GridSearchCVNN:
 
 
 class GridSearchCVNNParallel:
+    '''Parallelization of the standard Grid Search class
+    Parameters:
+        param_grid: dict. parameter grid with parameters combinations. A list of values for each parameter.
+    '''
     def __init__(self, params_grid:dict):
         self.param_grid = params_grid
         self.configurations = list(product(*params_grid.values()))
@@ -128,6 +154,17 @@ class GridSearchCVNNParallel:
 
 
     def fit(self, X, y, loss='mse', scoring=None, k_folds=4, epochs=100, shuffle=False, n_jobs=1):
+        '''Grid search execution
+        Args:
+            X: training matrix
+            y: training target
+            loss: training loss for model compile for each parameters combination
+            scoring: evaluation metric for model compile for each parameters combination
+            k_folds: number of folds for the k-fold cross validation
+            epochs: training epochs for the model compile
+            shuffle: boolean. shuffle control for k-fold cv
+            n_jobs: number of cores to exploit for the parallel grid search
+        '''
 
         self.X = X
         self.y = y
@@ -145,7 +182,12 @@ class GridSearchCVNNParallel:
         
 
     def train_config(self, i):
-
+        '''K-fold cross-validation for a single configuration
+        Args:
+            i: parameters configuration
+        Returns:
+            result: dict. mean loss, mean score, standard deviation for both loss and score on training and validation sets; computation time too.
+        '''
         start = timer()    
         config = self.configurations[i]
         config = {key:value for key,value in zip(self.param_grid.keys(), config)}
@@ -179,7 +221,9 @@ class GridSearchCVNNParallel:
         
         return result
 
+
 class HiddenPrints:
+    '''Class for hiding kfold single trainings prints'''
     def __enter__(self):
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')

@@ -3,8 +3,8 @@ import numpy as np
 def mse_loss(y_true, y_preds):
     '''MSE loss function. Mean squared error.
         Args:
-            y_true
-            y_preds
+            y_true: true target
+            y_preds: predicted output
         Returns:
             mse: loss
     '''
@@ -13,8 +13,8 @@ def mse_loss(y_true, y_preds):
 def mee_loss(y_true, y_preds):
     '''MEE loss function. Mean Euclidean error.
         Args:
-            y_true
-            y_preds
+            y_true: true target
+            y_preds: predicted output
         Returns:
             mee: loss
     '''
@@ -23,8 +23,8 @@ def mee_loss(y_true, y_preds):
 def accuracy_bin(y_true, y_preds):
     '''Accuracy bin function.
         Args:
-            y_true
-            y_preds
+            y_true: true target
+            y_preds: predicted output        
         Returns:
             accuracy
     '''
